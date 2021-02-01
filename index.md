@@ -5,7 +5,7 @@
 
 ## Links to my Projects
 ### Current Passion project
-<br>***[Real-time Object Map Tracking](https://github.com/OriMiller/RTHumanMapTracking)***
+***[Real-time Object Map Tracking](https://github.com/OriMiller/RTHumanMapTracking)***
 ### High school independent study project
-<br>***[Java File Server](https://github.com/OriMiller/javafileserver)***
+***[Java File Server](https://github.com/OriMiller/javafileserver)***
 <br>***[Java File Client](https://github.com/OriMiller/javafileclient)***
