@@ -393,6 +393,16 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 24px 28px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: all 0.25s ease;
+    }
+
+    a.pub-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.08);
     }
 
     .pub-item h3 {
@@ -616,20 +626,20 @@
       <h2>Research</h2>
       <div class="pub-list">
 
-        <div class="pub-item">
+        <a href="https://ieeexplore.ieee.org/iel8/10770012/10769998/10770001.pdf" class="pub-item" target="_blank" rel="noopener">
           <h3>Heterogeneous Multi-Robot Person-Following in Constrained Environments</h3>
           <p class="pub-venue">Ori A. Miller, Jason M. Gregory, Christopher Reardon · IEEE SSRR · November 2024</p>
-        </div>
+        </a>
 
-        <div class="pub-item">
+        <a href="https://dl.acm.org/doi/10.1145/3611654" class="pub-item" target="_blank" rel="noopener">
           <h3>Augmented Reality Visualization of Autonomous Mobile Robot Change Detection in Uninstrumented Environments</h3>
           <p class="pub-venue">Christopher Reardon, Jason M. Gregory, Kerstin S. Haring, Benjamin Dossett, Ori A. Miller, Aniekan Inyang · ACM Transactions on Human-Robot Interaction (THRI) · 2023</p>
-        </div>
+        </a>
 
-        <div class="pub-item">
+        <a href="https://raaslab.org/icra2023-hmrs/assets/contributed_papers/Ori_A_Miller_et_al.pdf" class="pub-item" target="_blank" rel="noopener">
           <h3>Teaming Heterogeneous Ground and Micro-Aerial Robots for Following of Non-Cooperative Agents</h3>
           <p class="pub-venue">Ori A. Miller, Christopher Reardon, Jason M. Gregory · Heterogeneity in Multi-Robot Systems Workshop, ICRA · London, UK · May 2023</p>
-        </div>
+        </a>
 
         <div class="pub-item">
           <h3>Autonomous Agent-aware Navigation in Underground Mine Environments</h3>
