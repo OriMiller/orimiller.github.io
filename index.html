@@ -37,6 +37,12 @@
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
     }
 
     .noise {
@@ -57,10 +63,13 @@
     /* Hero */
     .hero {
       min-height: 100vh;
+      min-height: 100svh;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
+      padding: 48px 24px 96px;
+      overflow: hidden;
     }
 
     .hero::before {
@@ -69,8 +78,8 @@
       top: -40%;
       left: 50%;
       transform: translateX(-50%);
-      width: 600px;
-      height: 600px;
+      width: min(600px, 100vw);
+      height: min(600px, 100vw);
       background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
       pointer-events: none;
     }
@@ -82,8 +91,9 @@
     }
 
     .avatar {
-      width: 440px;
-      height: 440px;
+      width: min(440px, 100%);
+      aspect-ratio: 1;
+      height: auto;
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid var(--border);
@@ -96,7 +106,7 @@
     }
 
     .hero h1 {
-      font-size: 3rem;
+      font-size: clamp(2.25rem, 8vw, 3rem);
       font-weight: 700;
       letter-spacing: -0.03em;
       margin-bottom: 16px;
@@ -417,6 +427,44 @@
       color: var(--accent);
     }
 
+    .explainer-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      border-radius: 16px;
+      padding: 20px 24px;
+      text-decoration: none;
+      color: inherit;
+      margin-bottom: 16px;
+      transition: all 0.25s ease;
+    }
+
+    .explainer-banner:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12);
+    }
+
+    .explainer-banner h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .explainer-banner p {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .explainer-banner .go {
+      color: var(--accent);
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
     /* Footer */
     footer {
       padding: 40px 0;
@@ -443,8 +491,8 @@
 
     /* Responsive */
     @media (max-width: 640px) {
-      .hero h1 {
-        font-size: 2.25rem;
+      .hero {
+        padding: 32px 20px 88px;
       }
 
       .hero .tagline {
@@ -452,16 +500,25 @@
       }
 
       .avatar {
-        width: 410px;
-        height: 410px;
+        width: min(320px, 100%);
+        margin-bottom: 24px;
+      }
+
+      .container {
+        padding: 0 20px;
       }
 
       section {
         padding: 60px 0;
       }
 
+      .timeline-item,
+      .pub-item {
+        padding: 20px;
+      }
+
       .project-card {
-        padding: 22px;
+        padding: 20px;
       }
     }
   </style>
@@ -627,6 +684,15 @@
     <section id="publications" class="fade-in">
       <p class="section-label">Publications</p>
       <h2>Research</h2>
+
+      <a href="thesis.html" class="explainer-banner">
+        <div>
+          <h3>My thesis, illustrated ✦</h3>
+          <p>A plain-English, visual walkthrough of my MS research — two robots, one person to follow, and a bake-off between forecasting and reinforcement learning.</p>
+        </div>
+        <span class="go">→</span>
+      </a>
+
       <div class="pub-list">
 
         <a href="papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" class="pub-item" target="_blank" rel="noopener">

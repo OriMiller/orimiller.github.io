@@ -1,0 +1,17 @@
+.DS_Store
+
+# Source material not published on the site
+Thesis Defense.pptx
+
+# Full-resolution originals — the site uses the web copies in images/web/
+images/*
+!images/web/
+
+# Raw recordings — the site uses the web-encoded versions listed below
+videos/*
+!videos/grid-search-video.mp4
+!videos/pointashoot.m4v
+!videos/Turtlebot spatially tasking Crazyflie.mp4
+!videos/turtlebot_following_rviz.mp4
+!videos/heuristic-realworld-camera.mp4
+!videos/heuristic-realworld-rviz.mp4
