@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How Two Robots Follow One Person — Ori Miller</title>
+  <meta name="description" content="An illustrated explanation of my MS thesis: Heterogeneous Multi-Robot Person-Following in Constrained Environments.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface-hover: #1a1a1a;
+      --border: #262626;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --teal: #0d9488;
+      --amber: #d97706;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    img, svg, video { max-width: 100%; height: auto; }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      z-index: 9999;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Top nav */
+    .topnav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topnav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      font-size: 0.875rem;
+    }
+    .topnav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .topnav a:hover { color: var(--text); }
+    .topnav .home::before { content: '← '; }
+
+    /* Hero */
+    .hero {
+      padding: 96px 0 72px;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(600px, 100vw);
+      height: min(600px, 100vw);
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero .standfirst {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+      max-width: 58ch;
+    }
+
+    .paper-ref {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+    .paper-ref strong { color: var(--text); font-weight: 600; }
+
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--surface);
+      transition: all 0.2s ease;
+    }
+    .btn:hover { border-color: var(--accent); background: var(--surface-hover); transform: translateY(-2px); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    /* Sections */
+    section { padding: 56px 0; }
+
+    section h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .prose {
+      font-size: 1.01rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .prose + .prose { margin-top: 16px; }
+    .prose strong { color: var(--text); font-weight: 600; }
+    .prose em { color: var(--text); font-style: italic; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+    .tag {
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 0.8125rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    /* Figure blocks */
+    .figure {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 28px 0;
+    }
+    .figure svg { display: block; width: 100%; height: auto; }
+    .figcaption {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      margin-top: 14px;
+      line-height: 1.6;
+      text-align: center;
+    }
+    .figure.media { padding: 0; overflow: hidden; }
+    .figure.media video, .figure.media img { display: block; width: 100%; }
+    .figure.media .figcaption { padding: 14px 20px 18px; margin-top: 0; }
+
+    /* Role cards */
+    .cards-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 28px 0;
+    }
+    .role-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .role-card .role-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .role-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; }
+    .role-card .role-sub { font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 8px; }
+    .role-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; }
+
+    /* Numbered steps */
+    .steps { display: grid; gap: 12px; margin: 28px 0; }
+    .step {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .step .n {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .step h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 3px; }
+    .step p { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Method header chips */
+    .method-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 5px 12px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+    }
+    .method-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .chip-blue { background: rgba(59, 130, 246, 0.12); color: #93c5fd; }
+    .chip-blue .dot { background: var(--accent); }
+    .chip-teal { background: rgba(13, 148, 136, 0.14); color: #5eead4; }
+    .chip-teal .dot { background: var(--teal); }
+    .chip-amber { background: rgba(217, 119, 6, 0.14); color: #fcd34d; }
+    .chip-amber .dot { background: var(--amber); }
+
+    /* Stat tiles */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 28px 0;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 20px;
+      text-align: center;
+    }
+    .stat .big {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .stat .big span { color: var(--accent); }
+    .stat .small {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 6px;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; margin: 28px 0; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      min-width: 560px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    th { color: var(--text); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    td:first-child, th:first-child { text-align: left; }
+    tr:last-child td { border-bottom: none; }
+    td.hi { color: var(--text); font-weight: 600; }
+    td.lo { color: #f87171; }
+
+    /* Photo grid */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 28px 0;
+    }
+    .photo-grid figure {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .photo-grid img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+    .photo-grid figcaption { font-size: 0.78rem; color: var(--text-secondary); padding: 12px 16px; line-height: 1.5; }
+
+    /* Citation */
+    .cite-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 12px;
+      padding: 20px 24px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 28px 0;
+    }
+    .cite-card strong { color: var(--text); }
+
+    hr.rule {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    footer {
+      padding: 40px 0 48px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    footer p { font-size: 0.8125rem; color: var(--text-secondary); }
+    footer a { color: var(--text-secondary); }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 640px) {
+      .container { padding: 0 20px; }
+      .hero { padding: 64px 0 48px; }
+      section { padding: 44px 0; }
+      .cards-3, .stats { grid-template-columns: 1fr; }
+      .photo-grid { grid-template-columns: 1fr; }
+      .figure { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <nav class="topnav">
+    <div class="container topnav-inner">
+      <a class="home" href="index.html">Ori Miller</a>
+      <a href="papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" target="_blank" rel="noopener">Paper PDF ↗</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <p class="section-label">Thesis, Illustrated</p>
+      <h1>How do you teach two very different robots to follow one person?</h1>
+      <p class="standfirst">
+        A slow ground robot that thinks deeply. A fast little drone that sees everything. My master's research put them on the same team — and pitted a hand-built forecasting algorithm against reinforcement learning to find out which one keeps up with a person best.
+      </p>
+      <div class="paper-ref">
+        <strong>Heterogeneous Multi-Robot Person-Following in Constrained Environments</strong><br>
+        Ori A. Miller, Jason M. Gregory, Christopher Reardon · IEEE SSRR 2024, New York City
+      </div>
+      <div class="btn-row">
+        <a class="btn primary" href="papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" target="_blank" rel="noopener">Read the paper</a>
+        <a class="btn" href="#results">Skip to results ↓</a>
+      </div>
+    </div>
+  </header>
+
+  <hr class="rule">
+
+  <section class="fade-in" id="problem">
+    <div class="container">
+      <p class="section-label">01 · The Problem</p>
+      <h2>Robots that follow people are useful — until the person turns a corner</h2>
+      <p class="prose">
+        A robot that can autonomously follow a person is a building block for a lot of real missions: hauling gear for a search-and-rescue team, assisting patients, carrying supplies for soldiers, or providing social assistance.
+      </p>
+      <div class="tags">
+        <span class="tag">Search &amp; Rescue</span>
+        <span class="tag">Healthcare</span>
+        <span class="tag">Military Teaming</span>
+        <span class="tag">Social Assistance</span>
+      </div>
+      <p class="prose">
+        Most existing systems quietly assume the person will <em>cooperate</em>: walk at robot speed, stay in the open, glance back to make sure their robot buddy is keeping up. In high-stakes settings, nobody has time for that. The person moves how they move — and the robot has to deal with three hard constraints:
+      </p>
+
+      <div class="figure">
+        <svg viewBox="0 0 660 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of a person walking around a corner while a ground robot loses line of sight behind a wall">
+          <!-- floor grid -->
+          <g stroke="#1f1f1f" stroke-width="1">
+            <path d="M0 60 H660 M0 120 H660 M0 180 H660 M0 240 H660"/>
+            <path d="M110 0 V300 M220 0 V300 M330 0 V300 M440 0 V300 M550 0 V300"/>
+          </g>
+          <!-- walls -->
+          <g fill="#27272a" stroke="#3f3f46" stroke-width="1.5">
+            <rect x="300" y="0" width="150" height="150" rx="4"/>
+            <rect x="80" y="215" width="220" height="85" rx="4"/>
+          </g>
+          <text x="375" y="80" fill="#52525b" font-family="Inter, sans-serif" font-size="12" text-anchor="middle">obstacle</text>
+
+          <!-- person path -->
+          <path d="M180 180 H470 Q490 180 490 160 V70" fill="none" stroke="#3f3f46" stroke-width="2" stroke-dasharray="3 6"/>
+
+          <!-- blocked sight line -->
+          <line x1="120" y1="180" x2="452" y2="128" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 5" opacity="0.85"/>
+          <g transform="translate(388,138)">
+            <line x1="-9" y1="-9" x2="9" y2="9" stroke="#ef4444" stroke-width="3"/>
+            <line x1="-9" y1="9" x2="9" y2="-9" stroke="#ef4444" stroke-width="3"/>
+          </g>
+          <text x="228" y="128" fill="#ef4444" font-family="Inter, sans-serif" font-size="12" font-weight="600">line of sight blocked</text>
+
+          <!-- UGV -->
+          <g transform="translate(120,180)">
+            <rect x="-26" y="-16" width="52" height="32" rx="7" fill="#3b82f6"/>
+            <circle cx="-14" cy="20" r="7" fill="#0a0a0a" stroke="#3b82f6" stroke-width="2.5"/>
+            <circle cx="14" cy="20" r="7" fill="#0a0a0a" stroke="#3b82f6" stroke-width="2.5"/>
+            <rect x="-6" y="-26" width="12" height="10" rx="2" fill="#93c5fd"/>
+            <text x="0" y="52" fill="#93c5fd" font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">ground robot</text>
+          </g>
+
+          <!-- person -->
+          <g transform="translate(490,64)">
+            <circle cx="0" cy="-14" r="9" fill="#fafafa"/>
+            <path d="M0 -5 V16 M0 0 L-11 10 M0 0 L11 10 M0 16 L-9 32 M0 16 L9 32" stroke="#fafafa" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+            <text x="34" y="6" fill="#fafafa" font-family="Inter, sans-serif" font-size="12" font-weight="600">person</text>
+            <text x="34" y="22" fill="#71717a" font-family="Inter, sans-serif" font-size="11">didn't wait</text>
+          </g>
+
+          <!-- question mark near robot -->
+          <text x="168" y="158" fill="#71717a" font-family="Inter, sans-serif" font-size="20" font-weight="700">?</text>
+        </svg>
+        <p class="figcaption">The core failure mode: the moment the person rounds a corner, a single ground robot is blind — and it's already slower than they are.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step"><div class="n">1</div><div><h4>Occlusion</h4><p>Indoors — or under a roof line or tree cover — you can't just fly a camera high above the scene. At low altitude, walls and clutter constantly break the robot's view of the person.</p></div></div>
+        <div class="step"><div class="n">2</div><div><h4>Speed</h4><p>The robot's top speed is the same order of magnitude as the person's. There's no catching up after a mistake, so every navigation decision has to be timely and correct.</p></div></div>
+        <div class="step"><div class="n">3</div><div><h4>No prior knowledge</h4><p>The robots get no map, no planned route, and no model of the person — nothing but a bound on how fast they could possibly move.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="fade-in" id="team">
+    <div class="container">
+      <p class="section-label">02 · The Idea</p>
+      <h2>Pair an odd couple: a thinker and a scout</h2>
+      <p class="prose">
+        No single robot solves all three constraints at once. So the thesis pairs two robots whose strengths are exactly each other's weaknesses, plus the person they're trying to keep up with:
+      </p>
+
+      <div class="cards-3">
+        <div class="role-card">
+          <div class="role-icon" style="background: rgba(59,130,246,0.12);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"><rect x="4" y="8" width="16" height="9" rx="2"/><circle cx="8" cy="19" r="1.6"/><circle cx="16" cy="19" r="1.6"/><path d="M12 8V5M10 5h4"/></svg>
+          </div>
+          <h3>The Follower</h3>
+          <p class="role-sub">Ground robot · UGV</p>
+          <p>Slow but capable — carries the payload, the sensors, and the compute. Its job: physically reach the person's position.</p>
+        </div>
+        <div class="role-card">
+          <div class="role-icon" style="background: rgba(59,130,246,0.12);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="18" r="2.4"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.2"/><path d="M8 8l1.8 1.8M16 8l-1.8 1.8M8 16l1.8-1.8M16 16l-1.8-1.8"/></svg>
+          </div>
+          <h3>The Observer</h3>
+          <p class="role-sub">Micro-drone · UAV</p>
+          <p>Fast but simple — little compute, locked to one low altitude. Its job: keep the person in view and report where they are.</p>
+        </div>
+        <div class="role-card">
+          <div class="role-icon" style="background: rgba(250,250,250,0.08);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5.5" r="2.6"/><path d="M12 8.5v6M12 10l-4.5 3M12 10l4.5 3M12 14.5L8.5 20M12 14.5l3.5 5.5"/></svg>
+          </div>
+          <h3>The Target</h3>
+          <p class="role-sub">Person</p>
+          <p>Walks their own path to their own destination — faster than the ground robot, with zero obligation to cooperate.</p>
+        </div>
+      </div>
+
+      <div class="figure">
+        <svg viewBox="0 0 660 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Speed ordering: ground robot slower than person, person slower than drone">
+          <text x="330" y="24" fill="#fafafa" font-family="Inter, sans-serif" font-size="14" font-weight="600" text-anchor="middle">The speed ordering that shapes everything</text>
+          <!-- track -->
+          <line x1="40" y1="150" x2="620" y2="150" stroke="#27272a" stroke-width="2"/>
+          <!-- UGV -->
+          <g transform="translate(110,150)">
+            <rect x="-24" y="-40" width="48" height="26" rx="6" fill="#3b82f6"/>
+            <circle cx="-12" cy="-9" r="6" fill="#0a0a0a" stroke="#3b82f6" stroke-width="2.5"/>
+            <circle cx="12" cy="-9" r="6" fill="#0a0a0a" stroke="#3b82f6" stroke-width="2.5"/>
+            <text x="0" y="24" fill="#93c5fd" font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">UGV</text>
+            <path d="M34 -27 h26" stroke="#52525b" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <text x="220" y="118" fill="#71717a" font-family="Inter, sans-serif" font-size="22" font-weight="700" text-anchor="middle">&lt;</text>
+          <!-- person -->
+          <g transform="translate(330,150)">
+            <circle cx="0" cy="-46" r="8" fill="#fafafa"/>
+            <path d="M0 -38 V-20 M0 -33 L-10 -24 M0 -33 L10 -24 M0 -20 L-8 -4 M0 -20 L8 -4" stroke="#fafafa" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+            <text x="0" y="24" fill="#fafafa" font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Person</text>
+            <path d="M22 -32 h30 M22 -24 h22" stroke="#52525b" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <text x="440" y="118" fill="#71717a" font-family="Inter, sans-serif" font-size="22" font-weight="700" text-anchor="middle">&lt;</text>
+          <!-- UAV -->
+          <g transform="translate(550,120)">
+            <rect x="-9" y="-8" width="18" height="16" rx="3" fill="#60a5fa"/>
+            <g stroke="#60a5fa" stroke-width="2.4" stroke-linecap="round">
+              <path d="M-9 -8 L-20 -19 M9 -8 L20 -19 M-9 8 L-20 19 M9 8 L20 19"/>
+            </g>
+            <g stroke="#93c5fd" stroke-width="2">
+              <path d="M-28 -19 h16 M12 -19 h16 M-28 19 h16 M12 19 h16"/>
+            </g>
+            <text x="0" y="54" fill="#93c5fd" font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">UAV</text>
+            <path d="M32 0 h36 M32 8 h28 M32 -8 h20" stroke="#52525b" stroke-width="2" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <p class="figcaption">Max velocities: UGV &lt; person &lt; UAV. The drone can always keep up but can't act on what it sees; the ground robot can act but can't keep up. Teamwork is the only way through.</p>
+      </div>
+
+      <p class="prose">
+        The drone becomes the ground robot's <strong>eyes around the corner</strong>: it races to wherever it can see the person and streams their position, while the ground robot uses that feed to plan the smartest possible route — even a route that temporarily gives up its own view.
+      </p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="fade-in" id="methods">
+    <div class="container">
+      <p class="section-label">03 · Three Strategies</p>
+      <h2>Who decides where each robot goes?</h2>
+      <p class="prose">
+        The heart of the thesis is a bake-off between three motion strategies — a hand-engineered forecaster, a learned multi-agent policy, and a deliberately simple baseline.
+      </p>
+
+      <!-- FORWARD-PF -->
+      <div style="margin-top: 40px;">
+        <span class="method-chip chip-blue"><span class="dot"></span>Strategy 1 · FORWARD-PF (heuristic)</span>
+        <h2 style="font-size: 1.25rem;">The forecaster: predict, score, assign</h2>
+        <p class="prose">
+          <strong>FORWARD-PF</strong> (Forecasting Optimization of Robotic Way-point Assignment for Robust and Dynamic Person-Following) treats the problem like a chess player thinking one move ahead:
+        </p>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div><h4>Model the person's motion</h4><p>Fit a third-degree polynomial to the person's recent positions — a smooth curve describing where they've been heading.</p></div></div>
+          <div class="step"><div class="n">2</div><div><h4>Project it forward</h4><p>Extend the curve a few seconds into the future, then scatter Gaussian samples around each predicted point — a cloud of "places they might plausibly be."</p></div></div>
+          <div class="step"><div class="n">3</div><div><h4>Score a grid of candidate spots</h4><p>Lay a grid of candidate goal locations around the person. Score each one twice: for the <strong>follower</strong>, closeness to the predicted position; for the <strong>observer</strong>, how many predicted points it can see (line-of-sight), minus travel cost.</p></div></div>
+          <div class="step"><div class="n">4</div><div><h4>Send each robot to its best spot</h4><p>The follower gets the best proximity cell, the observer the best visibility cell — unless the spot each is already standing on scores higher, in which case: don't move. Repeat every cycle.</p></div></div>
+        </div>
+
+        <div class="figure">
+          <svg viewBox="0 0 660 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FORWARD-PF candidate grid scored around a moving person with predicted motion samples">
+            <!-- obstacle -->
+            <rect x="392" y="18" width="176" height="106" rx="4" fill="#27272a" stroke="#3f3f46" stroke-width="1.5"/>
+            <text x="480" y="76" fill="#52525b" font-family="Inter, sans-serif" font-size="12" text-anchor="middle">obstacle</text>
+
+            <!-- candidate grid around person -->
+            <g>
+              <!-- row 1 -->
+              <rect x="300" y="140" width="44" height="44" rx="6" fill="#ef4444" opacity="0.16"/>
+              <rect x="350" y="140" width="44" height="44" rx="6" fill="#f59e0b" opacity="0.2"/>
+              <rect x="400" y="140" width="44" height="44" rx="6" fill="#22c55e" opacity="0.3"/>
+              <rect x="450" y="140" width="44" height="44" rx="6" fill="#22c55e" opacity="0.55"/>
+              <!-- row 2 -->
+              <rect x="300" y="190" width="44" height="44" rx="6" fill="#f59e0b" opacity="0.2"/>
+              <rect x="350" y="190" width="44" height="44" rx="6" fill="#22c55e" opacity="0.25"/>
+              <rect x="400" y="190" width="44" height="44" rx="6" fill="#22c55e" opacity="0.4"/>
+              <rect x="450" y="190" width="44" height="44" rx="6" fill="#22c55e" opacity="0.28"/>
+              <!-- row 3 -->
+              <rect x="300" y="240" width="44" height="44" rx="6" fill="#ef4444" opacity="0.14"/>
+              <rect x="350" y="240" width="44" height="44" rx="6" fill="#ef4444" opacity="0.2"/>
+              <rect x="400" y="240" width="44" height="44" rx="6" fill="#f59e0b" opacity="0.22"/>
+              <rect x="450" y="240" width="44" height="44" rx="6" fill="#f59e0b" opacity="0.18"/>
+            </g>
+
+            <!-- selected goals -->
+            <rect x="450" y="140" width="44" height="44" rx="6" fill="none" stroke="#60a5fa" stroke-width="2.5"/>
+            <text x="472" y="132" fill="#60a5fa" font-family="Inter, sans-serif" font-size="11" font-weight="600" text-anchor="middle">UAV goal</text>
+            <rect x="400" y="190" width="44" height="44" rx="6" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+            <text x="422" y="248" fill="#93c5fd" font-family="Inter, sans-serif" font-size="11" font-weight="600" text-anchor="middle">UGV goal</text>
+
+            <!-- person + trail + prediction -->
+            <path d="M120 210 Q 220 200 305 208" fill="none" stroke="#52525b" stroke-width="2" stroke-dasharray="2 6"/>
+            <g transform="translate(330,208)">
+              <circle cx="0" cy="-16" r="8" fill="#fafafa"/>
+              <path d="M0 -8 V8 M0 -4 L-9 4 M0 -4 L9 4 M0 8 L-7 22 M0 8 L7 22" stroke="#fafafa" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+            </g>
+            <text x="330" y="290" fill="#fafafa" font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">person</text>
+            <text x="150" y="192" fill="#71717a" font-family="Inter, sans-serif" font-size="11" text-anchor="middle">observed trail</text>
+
+            <!-- predicted samples -->
+            <g fill="#60a5fa">
+              <circle cx="368" cy="196" r="3" opacity="0.9"/>
+              <circle cx="382" cy="188" r="3" opacity="0.75"/>
+              <circle cx="396" cy="182" r="3" opacity="0.6"/>
+              <circle cx="376" cy="206" r="2.5" opacity="0.5"/>
+              <circle cx="390" cy="198" r="2.5" opacity="0.45"/>
+              <circle cx="404" cy="190" r="2.5" opacity="0.4"/>
+              <circle cx="412" cy="176" r="2.5" opacity="0.35"/>
+              <circle cx="398" cy="170" r="2.5" opacity="0.4"/>
+              <circle cx="420" cy="184" r="2" opacity="0.3"/>
+            </g>
+            <text x="506" y="214" fill="#60a5fa" font-family="Inter, sans-serif" font-size="11" text-anchor="start" opacity="0.9">predicted motion cloud</text>
+
+            <!-- legend -->
+            <g font-family="Inter, sans-serif" font-size="11">
+              <rect x="40" y="30" width="13" height="13" rx="3" fill="#22c55e" opacity="0.5"/>
+              <text x="60" y="41" fill="#a1a1aa">high score</text>
+              <rect x="40" y="52" width="13" height="13" rx="3" fill="#f59e0b" opacity="0.3"/>
+              <text x="60" y="63" fill="#a1a1aa">medium</text>
+              <rect x="40" y="74" width="13" height="13" rx="3" fill="#ef4444" opacity="0.25"/>
+              <text x="60" y="85" fill="#a1a1aa">low score</text>
+            </g>
+          </svg>
+          <p class="figcaption">Every cycle, a grid of candidate goals is scored around the person. Green cells promise proximity or a clear view of the predicted motion cloud; the best cell for each robot becomes its next waypoint.</p>
+        </div>
+
+        <div class="figure media">
+          <video controls muted loop playsinline preload="metadata" src="videos/grid-search-video.mp4"></video>
+          <p class="figcaption">FORWARD-PF running in simulation: candidate goals colored from green (best) to red (worst), the blue circle marking the selected goal as the target moves.</p>
+        </div>
+      </div>
+
+      <!-- MARL -->
+      <div style="margin-top: 56px;">
+        <span class="method-chip chip-teal"><span class="dot"></span>Strategy 2 · Multi-Agent RL</span>
+        <h2 style="font-size: 1.25rem;">The learner: let the robots figure it out</h2>
+        <p class="prose">
+          The learned approach uses <strong>MADDPG</strong> — Multi-Agent Deep Deterministic Policy Gradient — with centralized training and decentralized execution. Three agents train together in a simple 2D particle world (PettingZoo's Multi-Particle Environment): a <em>target</em> that learns to evade, a <em>follower</em> rewarded for closing distance, and an <em>observer</em> rewarded for keeping line-of-sight, all penalized for collisions.
+        </p>
+        <div class="figure">
+          <svg viewBox="0 0 660 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Training in a 2D particle environment transfers to real 3D robots">
+            <!-- MPE side -->
+            <rect x="30" y="30" width="250" height="190" rx="12" fill="#0f0f10" stroke="#27272a" stroke-width="1.5"/>
+            <text x="155" y="56" fill="#a1a1aa" font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">2D particle world (MPE)</text>
+            <circle cx="90" cy="120" r="17" fill="#3f3f46"/>
+            <circle cx="150" cy="170" r="13" fill="#3f3f46"/>
+            <circle cx="228" cy="96" r="9" fill="#ef4444"/>
+            <circle cx="190" cy="150" r="12" fill="#0d9488"/>
+            <circle cx="212" cy="122" r="6.5" fill="#60a5fa"/>
+            <g font-family="Inter, sans-serif" font-size="10" fill="#71717a">
+              <text x="90" y="150">obstacles</text>
+              <text x="238" y="90">target</text>
+              <text x="176" y="176">follower</text>
+              <text x="222" y="114">observer</text>
+            </g>
+            <!-- arrow -->
+            <g>
+              <path d="M300 125 H360" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M352 117 L364 125 L352 133" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="331" y="108" fill="#93c5fd" font-family="Inter, sans-serif" font-size="11" font-weight="600" text-anchor="middle">sim-to-real</text>
+            </g>
+            <!-- real side -->
+            <rect x="380" y="30" width="250" height="190" rx="12" fill="#0f0f10" stroke="#27272a" stroke-width="1.5"/>
+            <text x="505" y="56" fill="#a1a1aa" font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">3D world, real robots</text>
+            <!-- UGV -->
+            <g transform="translate(455,150)">
+              <rect x="-26" y="-18" width="52" height="30" rx="6" fill="#0d9488"/>
+              <circle cx="-13" cy="16" r="7" fill="#0a0a0a" stroke="#0d9488" stroke-width="2.5"/>
+              <circle cx="13" cy="16" r="7" fill="#0a0a0a" stroke="#0d9488" stroke-width="2.5"/>
+            </g>
+            <!-- UAV -->
+            <g transform="translate(565,100)">
+              <rect x="-8" y="-7" width="16" height="14" rx="3" fill="#60a5fa"/>
+              <g stroke="#60a5fa" stroke-width="2.2" stroke-linecap="round">
+                <path d="M-8 -7 L-17 -16 M8 -7 L17 -16 M-8 7 L-17 16 M8 7 L17 16"/>
+              </g>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="10" fill="#71717a">
+              <text x="455" y="192" text-anchor="middle">non-holonomic UGV</text>
+              <text x="565" y="140" text-anchor="middle">UAV</text>
+            </g>
+          </svg>
+          <p class="figcaption">The catch: policies learn in a flat world of frictionless holonomic particles, then must drive a real differential-drive robot through 3D clutter. Bridging that gap — smoothing discrete actions, simplifying observations, rescaling coordinates — was half the battle.</p>
+        </div>
+        <p class="prose">
+          Getting the trained model onto actual robot platforms took a pipeline of adaptations: averaging discrete actions into continuous velocity commands, adding a local planner to catch collisions the policy never saw in training, and segmenting the observation space into fixed regions so the model tolerates any number of obstacles.
+        </p>
+      </div>
+
+      <!-- Baseline -->
+      <div style="margin-top: 56px;">
+        <span class="method-chip chip-amber"><span class="dot"></span>Baseline · Point-and-Shoot</span>
+        <h2 style="font-size: 1.25rem;">The sprinter: just aim at the person and drive</h2>
+        <p class="prose">
+          The baseline is a single ground robot doing the obvious thing: keep the person's bounding box centered in the camera and drive forward. No drone, no prediction, no planning. It's fast, cheap, and — as the experiments show — it works right up until the person does anything interesting.
+        </p>
+        <div class="figure media">
+          <video controls muted loop playsinline preload="metadata" src="videos/pointashoot.m4v"></video>
+          <p class="figcaption">Point-and-shoot in action: pure reactive pursuit. Great on straight lines; helpless the moment line-of-sight breaks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="fade-in" id="experiments">
+    <div class="container">
+      <p class="section-label">04 · The Gauntlet</p>
+      <h2>Nine paths, three levels of chaos</h2>
+      <p class="prose">
+        All three strategies ran in a Unity-based ROS simulation built on an Army Research Laboratory autonomy stack (300+ packages — lidar and vision perception, mapping, metric and symbolic planning). Across three different areas, the simulated person walked nine predefined paths of increasing <em>tortuosity</em> — from gentle easy routes to hard, corner-heavy gauntlets. The robots start together; the clock starts when the person first enters their view.
+      </p>
+      <div class="tags">
+        <span class="tag"><strong style="color:var(--text)">Success rate</strong> — did the UGV reach the person's final position?</span>
+        <span class="tag"><strong style="color:var(--text)">Arrival time</strong> — how long after the person stopped?</span>
+        <span class="tag"><strong style="color:var(--text)">Time in view</strong> — % of the run with eyes on the person</span>
+        <span class="tag"><strong style="color:var(--text)">Cumulative &amp; max distance</strong> — how efficient was the route?</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="fade-in" id="results">
+    <div class="container">
+      <p class="section-label">05 · Results</p>
+      <h2>The forecaster beat the learner — and both crushed the baseline</h2>
+
+      <div class="figure">
+        <div class="legend">
+          <span><i style="background:#d97706"></i>Point-and-Shoot</span>
+          <span><i style="background:#0d9488"></i>MARL</span>
+          <span><i style="background:#3b82f6"></i>FORWARD-PF</span>
+        </div>
+        <svg viewBox="0 0 660 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bar chart of success rate by path difficulty: FORWARD-PF succeeds on nearly all paths, MARL fails on hard paths, point-and-shoot only completes easy paths">
+          <text x="330" y="22" fill="#fafafa" font-family="Inter, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Success rate by path difficulty</text>
+          <!-- gridlines -->
+          <g stroke="#1f1f1f" stroke-width="1">
+            <line x1="60" y1="60" x2="620" y2="60"/>
+            <line x1="60" y1="120" x2="620" y2="120"/>
+            <line x1="60" y1="180" x2="620" y2="180"/>
+          </g>
+          <line x1="60" y1="240" x2="620" y2="240" stroke="#3f3f46" stroke-width="1.5"/>
+          <g font-family="Inter, sans-serif" font-size="10" fill="#71717a" text-anchor="end">
+            <text x="52" y="64">100%</text>
+            <text x="52" y="124">67%</text>
+            <text x="52" y="184">33%</text>
+            <text x="52" y="244">0%</text>
+          </g>
+          <!-- Easy group (all 100%) -->
+          <g>
+            <rect x="95"  y="60" width="40" height="180" rx="4" fill="#d97706"/>
+            <rect x="141" y="60" width="40" height="180" rx="4" fill="#0d9488"/>
+            <rect x="187" y="60" width="40" height="180" rx="4" fill="#3b82f6"/>
+            <g font-family="Inter, sans-serif" font-size="11" fill="#fafafa" text-anchor="middle" font-weight="600">
+              <text x="115" y="52">100</text><text x="161" y="52">100</text><text x="207" y="52">100</text>
+            </g>
+            <text x="161" y="268" fill="#a1a1aa" font-family="Inter, sans-serif" font-size="12" text-anchor="middle" font-weight="600">Easy paths</text>
+          </g>
+          <!-- Medium group PS 0, MARL 100, H 100 -->
+          <g>
+            <rect x="285" y="238" width="40" height="2" rx="1" fill="#d97706"/>
+            <rect x="331" y="60" width="40" height="180" rx="4" fill="#0d9488"/>
+            <rect x="377" y="60" width="40" height="180" rx="4" fill="#3b82f6"/>
+            <g font-family="Inter, sans-serif" font-size="11" text-anchor="middle" font-weight="600">
+              <text x="305" y="230" fill="#fcd34d">0</text>
+              <text x="351" y="52" fill="#fafafa">100</text><text x="397" y="52" fill="#fafafa">100</text>
+            </g>
+            <text x="351" y="268" fill="#a1a1aa" font-family="Inter, sans-serif" font-size="12" text-anchor="middle" font-weight="600">Medium paths</text>
+          </g>
+          <!-- Hard group PS 0, MARL 33, H 92 -->
+          <g>
+            <rect x="475" y="238" width="40" height="2" rx="1" fill="#d97706"/>
+            <rect x="521" y="180.6" width="40" height="59.4" rx="4" fill="#0d9488"/>
+            <rect x="567" y="74.4" width="40" height="165.6" rx="4" fill="#3b82f6"/>
+            <g font-family="Inter, sans-serif" font-size="11" text-anchor="middle" font-weight="600">
+              <text x="495" y="230" fill="#fcd34d">0</text>
+              <text x="541" y="172" fill="#fafafa">33</text>
+              <text x="587" y="66" fill="#fafafa">92</text>
+            </g>
+            <text x="541" y="268" fill="#a1a1aa" font-family="Inter, sans-serif" font-size="12" text-anchor="middle" font-weight="600">Hard paths</text>
+          </g>
+        </svg>
+        <p class="figcaption">Point-and-shoot only survives the easy routes. MARL holds through medium difficulty but collides on hard paths. FORWARD-PF completes every path, with near-perfect success even on the hardest ones.</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <p class="big"><span>9/9</span></p>
+          <p class="small">paths completed by FORWARD-PF — the only method to finish them all</p>
+        </div>
+        <div class="stat">
+          <p class="big"><span>1.95×</span></p>
+          <p class="small">faster arrival at the target with FORWARD-PF vs. the learned MARL policy</p>
+        </div>
+        <div class="stat">
+          <p class="big"><span>≥71%</span></p>
+          <p class="small">time-in-view in every successful two-robot run — the drone earns its keep</p>
+        </div>
+      </div>
+
+      <p class="prose">
+        The visibility numbers tell the underlying story. When the drone keeps the person in sight, the ground robot always knows where to go; every MARL failure came on runs where visibility collapsed below 20%.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Time in view</th><th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>P6</th><th>P7</th><th>P8</th><th>P9</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Point-and-Shoot</td><td>0.61</td><td class="lo">0.85*</td><td class="lo">0.48*</td><td>0.51</td><td class="lo">0.35*</td><td class="lo">0.38*</td><td>0.69</td><td class="lo">0.24*</td><td class="lo">0.34*</td></tr>
+            <tr><td>MARL</td><td class="hi">1.00</td><td>0.71</td><td class="hi">1.00</td><td class="hi">1.00</td><td class="hi">1.00</td><td class="lo">0.14*</td><td class="hi">1.00</td><td>0.96</td><td class="lo">0.20*</td></tr>
+            <tr><td>FORWARD-PF</td><td class="hi">0.98</td><td class="hi">1.00</td><td class="hi">1.00</td><td class="hi">1.00</td><td class="hi">1.00</td><td class="hi">0.98</td><td class="hi">1.00</td><td class="hi">0.97</td><td>0.72</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="figcaption" style="text-align:left; margin-top:-16px;">Fraction of each run the person stayed visible to the robot team, per path. * marks failed runs.</p>
+
+      <h2 style="margin-top: 48px; font-size: 1.25rem;">The unexpected bonus: shortcuts</h2>
+      <p class="prose">
+        Something emerged that wasn't programmed in. Because the drone keeps reporting the person's position, the slow ground robot doesn't have to retrace the person's winding path — it can <strong>cut the corner</strong> and plan the shortest route to wherever they are now. Both two-robot methods discovered this behavior on their own, and it replicated on real hardware.
+      </p>
+
+      <div class="figure">
+        <svg viewBox="0 0 660 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram showing the ground robot taking a straight shortcut while the person and drone take a winding path">
+          <!-- obstacles -->
+          <g fill="#27272a" stroke="#3f3f46" stroke-width="1.5">
+            <rect x="252" y="80" width="112" height="46" rx="4"/>
+            <rect x="300" y="180" width="150" height="64" rx="4"/>
+          </g>
+          <!-- person path: big loop -->
+          <path d="M80 140 Q 160 60 250 30 Q 400 -6 520 60 Q 588 100 590 150"
+                fill="none" stroke="#fafafa" stroke-width="2.5" stroke-dasharray="1 7" stroke-linecap="round"/>
+          <text x="95" y="85" fill="#fafafa" font-family="Inter, sans-serif" font-size="11" font-weight="600">person's winding route</text>
+          <!-- UAV path: follows person loosely -->
+          <path d="M85 155 Q 180 90 280 62 Q 420 26 520 86 Q 570 118 578 152"
+                fill="none" stroke="#60a5fa" stroke-width="2" stroke-dasharray="6 5" opacity="0.8"/>
+          <text x="465" y="118" fill="#60a5fa" font-family="Inter, sans-serif" font-size="11" font-weight="600">UAV shadows them</text>
+          <!-- UGV shortcut -->
+          <path d="M80 170 Q 300 150 560 168" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+          <path d="M548 158 L566 168 L548 178" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="300" y="145" fill="#93c5fd" font-family="Inter, sans-serif" font-size="12" font-weight="700">UGV cuts straight through</text>
+
+          <!-- start marker -->
+          <g transform="translate(80,155)">
+            <circle r="6" fill="#3b82f6"/>
+            <text x="0" y="34" fill="#a1a1aa" font-family="Inter, sans-serif" font-size="11" text-anchor="middle">start</text>
+          </g>
+          <!-- person end -->
+          <g transform="translate(590,160)">
+            <circle cx="0" cy="-14" r="8" fill="#fafafa"/>
+            <path d="M0 -6 V10 M0 -2 L-9 6 M0 -2 L9 6 M0 10 L-7 24 M0 10 L7 24" stroke="#fafafa" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+            <text x="0" y="46" fill="#a1a1aa" font-family="Inter, sans-serif" font-size="11" text-anchor="middle">end</text>
+          </g>
+        </svg>
+        <p class="figcaption">Emergent efficiency: with the drone maintaining eyes-on, the ground robot plans point-to-point instead of playing follow-the-leader — covering less distance than the person did.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="fade-in" id="realworld">
+    <div class="container">
+      <p class="section-label">06 · Off the Screen</p>
+      <h2>Real robots, real hallway</h2>
+      <p class="prose">
+        To prove the approach isn't a simulation artifact, FORWARD-PF ran on real hardware: a <strong>Clearpath Jackal</strong> ground robot paired with a palm-sized <strong>Crazyflie</strong> quadrotor, localized by an OptiTrack motion-capture system in the lab. The shortcut behavior from simulation showed up in the real world too.
+      </p>
+
+      <div class="figure media">
+        <video controls muted loop playsinline preload="metadata" src="videos/heuristic-realworld-camera.mp4"></video>
+        <p class="figcaption">The heuristic method running live: the Jackal works its way around a cardboard obstacle wall to reach the person, with the OptiTrack rig watching from above.</p>
+      </div>
+
+      <div class="figure media">
+        <video controls muted loop playsinline preload="metadata" src="videos/heuristic-realworld-rviz.mp4"></video>
+        <p class="figcaption">The same run from inside the robot's head: RViz shows the live occupancy grid, the tracked target, and the goals FORWARD-PF assigns in real time.</p>
+      </div>
+
+      <div class="photo-grid">
+        <figure>
+          <img src="images/web/crazyflie-turtlebot.jpg" alt="Crazyflie micro-drone and TurtleBot ground robot on the lab floor" loading="lazy">
+          <figcaption>Hardware trials on the lab grid: a Crazyflie micro-UAV (left) and a TurtleBot ground platform (right).</figcaption>
+        </figure>
+        <figure>
+          <img src="images/web/turtlebot.jpg" alt="TurtleBot ground robot with lidar" loading="lazy">
+          <figcaption>The follower up close — lidar on top, camera up front, not built for speed.</figcaption>
+        </figure>
+        <figure>
+          <img src="images/web/robot-fleet.jpg" alt="The ARISE Lab robot fleet including ground robots, drones, and AR headsets" loading="lazy">
+          <figcaption>The ARISE Lab fleet at the University of Denver, where this research lived.</figcaption>
+        </figure>
+        <figure>
+          <img src="images/web/poster.jpg" alt="Ori Miller presenting the ground-air cooperative tracking research poster" loading="lazy">
+          <figcaption>Presenting the early ground-air tracking work that grew into this thesis.</figcaption>
+        </figure>
+      </div>
+
+      <div class="figure media">
+        <video controls muted loop playsinline preload="metadata" src="videos/Turtlebot%20spatially%20tasking%20Crazyflie.mp4"></video>
+        <p class="figcaption">The ground robot spatially tasking the Crazyflie — the observer lifting off to go find its person.</p>
+      </div>
+
+      <div class="figure media">
+        <video controls muted loop playsinline preload="metadata" src="videos/turtlebot_following_rviz.mp4"></video>
+        <p class="figcaption">What the robot sees: the live RViz view during a real person-following run.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="fade-in" id="takeaways">
+    <div class="container">
+      <p class="section-label">07 · Takeaways</p>
+      <h2>What I'd tell you over coffee</h2>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><div><h4>Heterogeneous teams unlock behavior neither robot has alone</h4><p>The shortcut behavior wasn't designed — it fell out of splitting "see the person" and "reach the person" across two platforms. The whole was genuinely more than the sum.</p></div></div>
+        <div class="step"><div class="n">2</div><div><h4>A good heuristic is hard to beat</h4><p>FORWARD-PF outperformed the learned policy on every metric that mattered, with far less development pain. RL showed real promise — but sim-to-real transfer, not learning, was the bottleneck.</p></div></div>
+        <div class="step"><div class="n">3</div><div><h4>Visibility is the currency</h4><p>Every failure across every method traces back to losing sight of the person. Quantifying the minimum visibility a team needs is the next research question this work opens.</p></div></div>
+      </div>
+
+      <div class="cite-card">
+        <strong>If you cite this work:</strong><br>
+        O. A. Miller, J. M. Gregory, and C. Reardon, "Heterogeneous Multi-Robot Person-Following in Constrained Environments," <em>2024 IEEE International Symposium on Safety, Security, and Rescue Robotics (SSRR)</em>, New York City, USA, Nov. 2024.
+      </div>
+
+      <div class="btn-row">
+        <a class="btn primary" href="papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" target="_blank" rel="noopener">Read the full paper</a>
+        <a class="btn" href="index.html">← Back to home</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Ori Miller · <a href="index.html">orimiller.github.io</a></p>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.06 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
