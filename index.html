@@ -233,6 +233,75 @@
       color: var(--text-secondary);
     }
 
+    button.tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button.tag svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.55;
+    }
+
+    button.tag:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    button.tag:hover svg {
+      opacity: 1;
+      color: var(--accent);
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 28px 20px;
+      background: rgba(5, 5, 5, 0.88);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      cursor: zoom-out;
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox img {
+      max-width: min(920px, 100%);
+      max-height: 78vh;
+      width: auto;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      transform: scale(0.97);
+      transition: transform 0.25s ease;
+    }
+
+    .lightbox.open img {
+      transform: scale(1);
+    }
+
+    .lightbox figcaption {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-align: center;
+      max-width: 60ch;
+    }
+
     /* Photo strip */
     .photo-strip {
       display: grid;
@@ -377,92 +446,6 @@
       }
     }
 
-    /* Projects */
-    .projects-grid {
-      display: grid;
-      gap: 16px;
-    }
-
-    .project-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.25s ease;
-      display: block;
-    }
-
-    .project-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.08);
-    }
-
-    .project-badge {
-      display: inline-block;
-      font-size: 0.6875rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 14px;
-    }
-
-    .badge-featured {
-      background: rgba(59, 130, 246, 0.12);
-      color: var(--accent);
-    }
-
-    .badge-archive {
-      background: rgba(161, 161, 170, 0.1);
-      color: var(--text-secondary);
-    }
-
-    .project-card h3 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .project-card h3 svg {
-      width: 16px;
-      height: 16px;
-      color: var(--text-secondary);
-      flex-shrink: 0;
-      transition: color 0.2s ease;
-    }
-
-    .project-card:hover h3 svg {
-      color: var(--accent);
-    }
-
-    .project-card p {
-      color: var(--text-secondary);
-      font-size: 0.9375rem;
-      line-height: 1.6;
-    }
-
-    .project-tech {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-
-    .tech-tag {
-      font-size: 0.75rem;
-      padding: 3px 10px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-secondary);
-    }
-
     /* Publications */
     .pub-list {
       display: grid;
@@ -587,10 +570,6 @@
       .pub-item {
         padding: 20px;
       }
-
-      .project-card {
-        padding: 20px;
-      }
     }
   </style>
 </head>
@@ -637,13 +616,13 @@
         Originally from St. Louis, Missouri. I hold an MS in Computer Science (Robotics) and a BS in Computer Science from the University of Denver, where I spent three years as a Research Assistant in the ARISE Lab under Dr. Christopher Reardon. I now work at Sandia National Laboratories as an Autonomy &amp; Counter-Autonomy Researcher, focusing on autonomous testing, physical security evaluation, and adversarial robotics.
       </p>
       <div class="tags">
-        <span class="tag">Photography</span>
-        <span class="tag">Fly Fishing</span>
+        <button class="tag" data-photo="images/web/hobby-photography.jpg" data-caption="Through the lens — a hummingbird posing at a feeder.">Photography<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+        <button class="tag" data-photo="images/web/hobby-flyfishing.jpg" data-caption="Casting on the Merced River below El Capitan, Yosemite.">Fly Fishing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
         <span class="tag">Ultimate Frisbee</span>
-        <span class="tag">Skiing</span>
-        <span class="tag">Biking</span>
-        <span class="tag">Running</span>
-        <span class="tag">Climbing</span>
+        <button class="tag" data-photo="images/web/hobby-skiing.jpg" data-caption="Scoping lines on a backcountry day in the Rockies.">Skiing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+        <button class="tag" data-photo="images/web/hobby-biking.jpg" data-caption="Fall gravel miles through the aspens.">Biking<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+        <button class="tag" data-photo="images/web/hobby-running.jpg" data-caption="Sunset trail run in the foothills.">Running<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+        <button class="tag" data-photo="images/web/hobby-climbing.jpg" data-caption="On belay under New Mexico skies.">Climbing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
       </div>
       <div class="photo-strip">
         <figure>
@@ -808,41 +787,6 @@
       </div>
     </section>
 
-    <section id="projects" class="fade-in">
-      <p class="section-label">Projects</p>
-      <h2>Selected Work</h2>
-      <div class="projects-grid">
-        <a href="https://github.com/OriMiller/RTHumanMapTracking" class="project-card" target="_blank" rel="noopener">
-          <span class="project-badge badge-featured">Featured</span>
-          <h3>
-            Real-time Object Map Tracking
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-            </svg>
-          </h3>
-          <p>Real-time tracking and mapping of objects in physical space, combining computer vision with spatial computing.</p>
-          <div class="project-tech">
-            <span class="tech-tag">Computer Vision</span>
-            <span class="tech-tag">Real-time</span>
-          </div>
-        </a>
-
-        <a href="https://github.com/OriMiller/javafileserver" class="project-card" target="_blank" rel="noopener">
-          <span class="project-badge badge-archive">Archive</span>
-          <h3>
-            Java File Server &amp; Client
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-            </svg>
-          </h3>
-          <p>A client-server file transfer system built in Java. High school independent study exploring networking and distributed systems.</p>
-          <div class="project-tech">
-            <span class="tech-tag">Java</span>
-            <span class="tech-tag">Networking</span>
-          </div>
-        </a>
-      </div>
-    </section>
   </div>
 
   <footer>
@@ -851,7 +795,30 @@
     </div>
   </footer>
 
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <img alt="">
+    <figcaption></figcaption>
+  </div>
+
   <script>
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = lightbox.querySelector('img');
+    const lbCaption = lightbox.querySelector('figcaption');
+
+    document.querySelectorAll('button.tag[data-photo]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lbImg.src = btn.dataset.photo;
+        lbImg.alt = btn.dataset.caption;
+        lbCaption.textContent = btn.dataset.caption;
+        lightbox.classList.add('open');
+      });
+    });
+
+    lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') lightbox.classList.remove('open');
+    });
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
