@@ -233,6 +233,77 @@
       color: var(--text-secondary);
     }
 
+    /* Photo strip */
+    .photo-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 32px;
+    }
+
+    .photo-strip figure {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .photo-strip figure:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .photo-strip img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+
+    .photo-strip figcaption {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      line-height: 1.5;
+    }
+
+    .wide-figure {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .wide-figure img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 21/9;
+      object-fit: cover;
+    }
+
+    .wide-figure figcaption {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      padding: 12px 18px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 640px) {
+      .photo-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .photo-strip img {
+        aspect-ratio: 4/3;
+      }
+
+      .wide-figure img {
+        aspect-ratio: 4/3;
+      }
+    }
+
     /* Experience & Education */
     .timeline {
       display: grid;
@@ -574,6 +645,20 @@
         <span class="tag">Running</span>
         <span class="tag">Climbing</span>
       </div>
+      <div class="photo-strip">
+        <figure>
+          <img src="images/web/ori-turtlebot.jpg" alt="Ori holding a TurtleBot in the ARISE Lab" loading="lazy">
+          <figcaption>In the ARISE Lab with one of the TurtleBots</figcaption>
+        </figure>
+        <figure>
+          <img src="images/web/warthog-wipp.jpg" alt="Ori operating a Sandia Warthog robot in the field" loading="lazy">
+          <figcaption>Field testing a Warthog UGV for Sandia</figcaption>
+        </figure>
+        <figure>
+          <img src="images/web/poster.jpg" alt="Ori presenting research poster at the University of Denver" loading="lazy">
+          <figcaption>Presenting ground-air teaming research at DU</figcaption>
+        </figure>
+      </div>
     </section>
 
     <section id="experience" class="fade-in">
@@ -654,6 +739,11 @@
         </div>
 
       </div>
+
+      <figure class="wide-figure">
+        <img src="images/web/hri-study.jpg" alt="Participant wearing an AR headset spatially tasking a Jackal robot during an HRI study" loading="lazy">
+        <figcaption>Running an HRI study in the ARISE Lab — a participant tasks a Jackal UGV through an augmented-reality headset.</figcaption>
+      </figure>
     </section>
 
     <section id="education" class="fade-in">
