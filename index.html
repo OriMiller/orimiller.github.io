@@ -31,6 +31,70 @@
       scroll-behavior: smooth;
     }
 
+    /* Scroll progress hairline */
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      z-index: 300;
+      transition: width 0.08s linear;
+    }
+
+    /* Slim nav that slides in after the hero */
+    .minibar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 250;
+      background: rgba(10, 10, 10, 0.82);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .minibar.show { transform: translateY(0); }
+
+    .minibar-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .minibar .name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .minibar nav {
+      display: flex;
+      gap: 18px;
+    }
+
+    .minibar nav a {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .minibar nav a:hover { color: var(--accent-hover); }
+
+    @media (max-width: 640px) {
+      .minibar .name { display: none; }
+      .minibar-inner { justify-content: center; }
+      .minibar nav { gap: 16px; }
+    }
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
@@ -96,13 +160,17 @@
       height: auto;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid var(--border);
+      border: none;
+      padding: 4px;
+      background: conic-gradient(from 210deg, var(--gradient-start), var(--gradient-end), var(--gradient-start));
+      box-shadow: 0 0 60px rgba(59, 130, 246, 0.18);
       margin-bottom: 32px;
-      transition: border-color 0.3s ease;
+      transition: box-shadow 0.4s ease, transform 0.4s ease;
     }
 
     .avatar:hover {
-      border-color: var(--accent);
+      box-shadow: 0 0 90px rgba(139, 92, 246, 0.3);
+      transform: scale(1.01);
     }
 
     .hero h1 {
@@ -208,6 +276,16 @@
       font-weight: 700;
       letter-spacing: -0.02em;
       margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    section h2::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
     }
 
     /* About */
@@ -373,10 +451,52 @@
       }
     }
 
-    /* Experience & Education */
+    /* Experience & Education: connected timeline spine */
     .timeline {
       display: grid;
       gap: 24px;
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 12px;
+      bottom: 12px;
+      width: 1px;
+      background: linear-gradient(180deg, var(--accent) 0%, var(--border) 25%, var(--border) 85%, transparent 100%);
+    }
+
+    .timeline-item { position: relative; }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -27px;
+      top: 28px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      transition: border-color 0.25s ease;
+    }
+
+    .timeline-item:hover::before { border-color: var(--accent); }
+
+    .timeline-item.current::before {
+      border-color: var(--accent);
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+      animation: pulse 2.4s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.45); }
+      70% { box-shadow: 0 0 0 9px rgba(59, 130, 246, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
     }
 
     .timeline-item {
@@ -575,6 +695,19 @@
 </head>
 <body>
   <div class="noise"></div>
+  <div class="progress" id="progress"></div>
+
+  <div class="minibar" id="minibar">
+    <div class="minibar-inner">
+      <a class="name" href="#top">Ori Miller</a>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#experience">Experience</a>
+        <a href="#education">Education</a>
+        <a href="#publications">Research</a>
+      </nav>
+    </div>
+  </div>
 
   <section class="hero">
     <div class="hero-content">
@@ -645,7 +778,7 @@
       <h2>Work History</h2>
       <div class="timeline">
 
-        <div class="timeline-item">
+        <div class="timeline-item current">
           <div class="timeline-header">
             <h3>Autonomy &amp; Counter-Autonomy Researcher</h3>
             <span class="timeline-date">Aug 2024 — Present</span>
@@ -815,6 +948,14 @@
     });
 
     lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+
+    const progressBar = document.getElementById('progress');
+    const minibar = document.getElementById('minibar');
+    window.addEventListener('scroll', () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      progressBar.style.width = (window.scrollY / max * 100) + '%';
+      minibar.classList.toggle('show', window.scrollY > window.innerHeight * 0.85);
+    }, { passive: true });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') lightbox.classList.remove('open');
     });
