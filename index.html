@@ -451,6 +451,95 @@
       }
     }
 
+    /* Focus areas */
+    .focus-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .focus-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      transition: border-color 0.25s ease, transform 0.25s ease;
+    }
+
+    .focus-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .focus-card:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+
+    .focus-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--accent-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .focus-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .focus-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .focus-card p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .focus-card a {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--accent-hover);
+      text-decoration: none;
+    }
+
+    .focus-card a:hover { text-decoration: underline; }
+
+    .toolbox { margin-top: 28px; }
+
+    .toolbox-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .toolbox .tags { margin-top: 0; }
+
+    .timeline-item p a {
+      color: var(--accent-hover);
+      text-decoration: none;
+    }
+
+    .timeline-item p a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .focus-grid { grid-template-columns: 1fr; }
+      .minibar nav { gap: 12px; }
+    }
+
     /* Experience & Education: connected timeline spine */
     .timeline {
       display: grid;
@@ -702,6 +791,7 @@
       <a class="name" href="#top">Ori Miller</a>
       <nav>
         <a href="#about">About</a>
+        <a href="#focus">Focus</a>
         <a href="#experience">Experience</a>
         <a href="#education">Education</a>
         <a href="#publications">Research</a>
@@ -713,7 +803,7 @@
     <div class="hero-content">
       <img src="Ori_Picture.jpg" alt="Ori Miller" class="avatar" />
       <h1>Ori Miller</h1>
-      <p class="tagline">Autonomy & Counter-Autonomy Researcher at Sandia National Laboratories, specializing in multi-agent robotics, reinforcement learning, and computer vision.</p>
+      <p class="tagline">Robotics engineer building robots that learn, see, and work alongside people. Currently an Autonomy &amp; Counter-Autonomy Researcher at Sandia National Laboratories.</p>
       <div class="location">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -773,6 +863,79 @@
       </div>
     </section>
 
+    <section id="focus" class="fade-in">
+      <p class="section-label">Focus</p>
+      <h2>What I Work On</h2>
+      <div class="focus-grid">
+
+        <div class="focus-card">
+          <div class="focus-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+          </div>
+          <h3>Learning robot behaviors</h3>
+          <p>Multi-agent reinforcement learning for coordinated behavior: MADDPG policies with centralized training and decentralized execution, carried from a 2D training world into a 3D ROS autonomy stack.</p>
+          <a href="thesis.html#marl">How the sim-to-real transfer worked →</a>
+        </div>
+
+        <div class="focus-card">
+          <div class="focus-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <h3>Computer vision &amp; perception</h3>
+          <p>Detecting, tracking, and localizing people: LiDAR–camera fusion, camera-only range estimation, and EKF-filtered tracks that feed motion prediction.</p>
+          <a href="thesis.html#origins">See the perception pipeline →</a>
+        </div>
+
+        <div class="focus-card">
+          <div class="focus-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
+          </div>
+          <h3>Navigation</h3>
+          <p>Autonomy where GPS doesn't reach: human-safe navigation in underground mines, SLAM and occupancy-grid planning on Clearpath ground robots, and autonomous testing with Boston Dynamics Spot.</p>
+          <a href="papers/Ori_ICRA_Workshop_HRT_2023.pdf" target="_blank" rel="noopener">Underground navigation paper →</a>
+        </div>
+
+        <div class="focus-card">
+          <div class="focus-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+          </div>
+          <h3>Multi-robot systems</h3>
+          <p>Heterogeneous air–ground teams: FORWARD-PF, my predictive waypoint-assignment algorithm, plus spatial tasking of micro-drones and coordinate-frame alignment across robots.</p>
+          <a href="thesis.html">Read my thesis, illustrated →</a>
+        </div>
+
+        <div class="focus-card">
+          <div class="focus-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+          </div>
+          <h3>Human-robot interaction</h3>
+          <p>Robots that work around and with people: augmented-reality visualization of what a robot perceives, user studies with human participants, and person-following that doesn't depend on the person cooperating.</p>
+          <a href="papers/Augmented_Reality_Visualization_of_Auton.pdf" target="_blank" rel="noopener">ACM THRI paper →</a>
+        </div>
+
+      </div>
+
+      <div class="toolbox">
+        <p class="toolbox-label">Toolbox</p>
+        <div class="tags">
+          <span class="tag">Python</span>
+          <span class="tag">ROS</span>
+          <span class="tag">PettingZoo / Gym</span>
+          <span class="tag">MADDPG</span>
+          <span class="tag">Unity</span>
+          <span class="tag">RViz</span>
+          <span class="tag">SLAM</span>
+          <span class="tag">Velodyne LiDAR</span>
+          <span class="tag">Intel RealSense</span>
+          <span class="tag">OptiTrack</span>
+          <span class="tag">Boston Dynamics Spot</span>
+          <span class="tag">Clearpath Jackal &amp; Warthog</span>
+          <span class="tag">Bitcraze Crazyflie</span>
+          <span class="tag">AWS</span>
+        </div>
+      </div>
+    </section>
+
     <section id="experience" class="fade-in">
       <p class="section-label">Experience</p>
       <h2>Work History</h2>
@@ -798,6 +961,7 @@
           </div>
           <p class="timeline-org">University of Denver — ARISE Lab</p>
           <ul>
+            <li>Master's thesis: designed FORWARD-PF, a predictive waypoint-assignment algorithm for air–ground person-following, and benchmarked it against a MADDPG multi-agent RL policy adapted from 2D training to a 3D ROS autonomy stack.</li>
             <li>Demonstrated robotic GPS-denied human-safe navigation in sparsely featured underground mine environments.</li>
             <li>Poster presentation at the Robot Teammates in Dynamic Unstructured Environments workshop at ICRA 2023, London.</li>
           </ul>
@@ -869,6 +1033,7 @@
             <span class="timeline-date">2022 — 2024</span>
           </div>
           <p class="timeline-org">University of Denver — Ritchie School of Engineering &amp; Computer Science</p>
+          <p>Thesis: <a href="thesis.html">Heterogeneous Multi-Robot Person-Following in Constrained Environments</a> · Advisor: Dr. Christopher Reardon</p>
         </div>
 
         <div class="timeline-item">
@@ -890,12 +1055,17 @@
       <a href="thesis.html" class="explainer-banner">
         <div>
           <h3>My thesis, illustrated ✦</h3>
-          <p>A plain-English, visual walkthrough of my MS research — two robots, one person to follow, and a bake-off between forecasting and reinforcement learning.</p>
+          <p>A plain-English, visual walkthrough of my M.S. thesis: two robots, one person to follow, and a hand-built forecaster versus multi-agent RL, from sim-to-real transfer to hardware.</p>
         </div>
         <span class="go">→</span>
       </a>
 
       <div class="pub-list">
+
+        <a href="papers/Ori_Miller_MS_Thesis_2024.pdf" class="pub-item" target="_blank" rel="noopener">
+          <h3>Heterogeneous Multi-Robot Person-Following in Constrained Environments (M.S. Thesis)</h3>
+          <p class="pub-venue">Ori A. Miller · Advisor: Dr. Christopher Reardon · University of Denver · August 2024</p>
+        </a>
 
         <a href="papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" class="pub-item" target="_blank" rel="noopener">
           <h3>Heterogeneous Multi-Robot Person-Following in Constrained Environments</h3>
