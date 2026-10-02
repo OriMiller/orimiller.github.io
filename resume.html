@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ori Miller — Robotics Engineer</title>
+  <meta name="description" content="Résumé of Ori Miller, robotics engineer: reinforcement learning, computer vision, navigation, multi-robot systems, and human-robot interaction.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface-hover: #1a1a1a;
+      --border: #262626;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --gradient-start: #3b82f6;
+      --gradient-end: #8b5cf6;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    img { max-width: 100%; height: auto; display: block; }
+
+    a { color: var(--accent-hover); }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      z-index: 9999;
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .print-only { display: none; }
+
+    /* Top bar */
+    .top {
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      font-size: 0.875rem;
+    }
+
+    .top a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .top a:hover { color: var(--text); }
+
+    .pdf-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+
+    .pdf-btn:hover { border-color: var(--accent); }
+    .pdf-btn svg { width: 14px; height: 14px; }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      gap: 40px;
+      align-items: center;
+      padding: 56px 0 40px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -120px;
+      left: -80px;
+      width: min(560px, 100vw);
+      height: min(560px, 100vw);
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.09) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-text { position: relative; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent-hover);
+      margin-bottom: 14px;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2.4s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+      70% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 7vw, 3.75rem);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.02;
+      margin-bottom: 18px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .pitch {
+      font-size: clamp(1.1rem, 2.4vw, 1.3rem);
+      line-height: 1.5;
+      color: var(--text-secondary);
+      max-width: 34ch;
+      margin-bottom: 18px;
+    }
+
+    .pitch strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta svg { width: 14px; height: 14px; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn svg { width: 16px; height: 16px; }
+
+    .btn:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .hero-photo {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 0 60px rgba(59, 130, 246, 0.12);
+    }
+
+    .hero-photo img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+
+    .hero-photo figcaption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 28px 16px 12px;
+      font-size: 0.75rem;
+      color: #e4e4e7;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 18px 16px;
+    }
+
+    .stat .num {
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat .what {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 4px;
+    }
+
+    .stat .detail {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin-top: 2px;
+    }
+
+    /* Section labels */
+    .label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-hover);
+      margin-bottom: 18px;
+    }
+
+    .label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    /* Strengths */
+    .strengths { margin-bottom: 48px; }
+
+    .strength-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .strength {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 16px;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .strength:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .strength-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--accent-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .strength-icon svg { width: 16px; height: 16px; }
+
+    .strength h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+
+    .strength p {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Two-column body */
+    .columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 40px;
+      align-items: start;
+      margin-bottom: 56px;
+    }
+
+    .block { margin-bottom: 40px; }
+    .block:last-child { margin-bottom: 0; }
+
+    /* Experience */
+    .role {
+      position: relative;
+      padding: 0 0 26px 24px;
+      border-left: 1px solid var(--border);
+    }
+
+    .role:last-of-type { padding-bottom: 8px; }
+
+    .role::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 7px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--border);
+    }
+
+    .role.current::before {
+      background: var(--accent);
+      border-color: var(--accent);
+      animation: pulse 2.4s ease-out infinite;
+    }
+
+    .role-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .role h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .org {
+      font-size: 0.875rem;
+      color: var(--accent-hover);
+    }
+
+    .when {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .role ul {
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+
+    .role li {
+      position: relative;
+      padding-left: 16px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .role li::before {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 0.62em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #3f3f46;
+    }
+
+    .role li strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .earlier {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 8px;
+    }
+
+    .earlier strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Featured project */
+    .featured {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .featured img {
+      width: 100%;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .featured-body { padding: 20px 22px 22px; }
+
+    .featured-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .featured h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .featured p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0 16px;
+    }
+
+    .result {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.22);
+      border-radius: 8px;
+      padding: 5px 10px;
+    }
+
+    .result strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .text-link {
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--accent-hover);
+    }
+
+    .text-link:hover { text-decoration: underline; }
+
+    /* Sidebar */
+    .side h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 16px 0 8px;
+    }
+
+    .side h3:first-of-type { margin-top: 0; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 4px 10px;
+    }
+
+    .entry { margin-bottom: 14px; }
+    .entry:last-child { margin-bottom: 0; }
+
+    .entry-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .entry-sub {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .entry a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .entry a:hover { color: var(--accent-hover); }
+
+    .venue {
+      color: var(--accent-hover);
+      font-weight: 500;
+    }
+
+    .plain-list {
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+
+    .plain-list li {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .plain-list li strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Closing CTA */
+    .cta {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 20px;
+      padding: 40px 24px;
+      margin-bottom: 56px;
+    }
+
+    .cta h2 {
+      font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .cta p {
+      color: var(--text-secondary);
+      max-width: 52ch;
+      margin: 0 auto 22px;
+    }
+
+    .cta .actions { justify-content: center; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0 40px;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    footer a {
+      color: var(--text-secondary);
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .strength-grid { grid-template-columns: repeat(2, 1fr); }
+      .strength:last-child { grid-column: 1 / -1; }
+      .columns { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding: 36px 0 32px;
+      }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+      .wrap { padding: 0 18px; }
+      .top-inner { padding: 12px 18px; }
+      .strength-grid { grid-template-columns: 1fr; }
+      .role-head { flex-direction: column; gap: 2px; }
+      .stat { padding: 16px 14px 14px; }
+      .stat .num { font-size: 1.25rem; white-space: nowrap; }
+    }
+
+    /* Print: a clean, light résumé when saved as PDF */
+    @media print {
+      @page { size: letter; margin: 0.45in 0.5in; }
+
+      :root {
+        --bg: #ffffff;
+        --surface: #ffffff;
+        --border: #d4d4d8;
+        --text: #111111;
+        --text-secondary: #3f3f46;
+        --accent: #1d4ed8;
+        --accent-hover: #1d4ed8;
+      }
+
+      html, body {
+        background: #fff;
+        font-size: 9.5pt;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        box-shadow: none !important;
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .noise, .top, .hero-photo, .hero::before, .actions, .featured img,
+      .text-link, .cta, footer, .strength-icon { display: none !important; }
+
+      .print-only { display: block; }
+
+      .wrap { max-width: none; padding: 0; }
+
+      .hero {
+        display: block;
+        padding: 0 0 8pt;
+      }
+
+      .eyebrow { margin-bottom: 2pt; font-size: 8pt; }
+      .pulse { display: none; }
+
+      h1 {
+        font-size: 24pt;
+        margin-bottom: 4pt;
+        background: none;
+        -webkit-text-fill-color: #111;
+        color: #111;
+      }
+
+      .pitch {
+        font-size: 10.5pt;
+        max-width: none;
+        margin-bottom: 4pt;
+        color: #3f3f46;
+      }
+
+      .meta { margin-bottom: 2pt; font-size: 8.5pt; }
+
+      .contact-line {
+        font-size: 8.5pt;
+        color: #1d4ed8;
+      }
+
+      .stats {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6pt;
+        margin: 8pt 0 12pt;
+      }
+
+      .stat {
+        padding: 6pt 8pt;
+        border-radius: 6pt;
+        break-inside: avoid;
+      }
+
+      .stat .num {
+        font-size: 15pt;
+        background: none;
+        -webkit-text-fill-color: #1d4ed8;
+        color: #1d4ed8;
+      }
+
+      .stat .what { font-size: 8.5pt; margin-top: 0; }
+      .stat .detail { font-size: 7.5pt; }
+
+      .label {
+        font-size: 8pt;
+        margin-bottom: 6pt;
+        color: #1d4ed8;
+      }
+
+      .strengths { margin-bottom: 12pt; }
+
+      .strength-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6pt;
+      }
+
+      .strength {
+        padding: 6pt 7pt;
+        border-radius: 6pt;
+        break-inside: avoid;
+      }
+
+      .strength:last-child { grid-column: auto; }
+
+      .strength h3 { font-size: 8.5pt; margin-bottom: 2pt; }
+      .strength p { font-size: 7.5pt; line-height: 1.4; }
+
+      .columns {
+        grid-template-columns: minmax(0, 1fr) 2.15in;
+        gap: 16pt;
+        margin-bottom: 0;
+      }
+
+      .block { margin-bottom: 12pt; }
+
+      .role {
+        padding: 0 0 8pt;
+        border-left: none;
+        break-inside: avoid;
+      }
+
+      .role::before { display: none; }
+      .role-head { margin-bottom: 3pt; }
+      .role h3 { font-size: 10pt; }
+      .org, .when { font-size: 8.5pt; }
+      .role ul { gap: 2pt; }
+      .role li { font-size: 8.75pt; line-height: 1.4; padding-left: 10pt; }
+      .role li::before { background: #71717a; width: 4pt; height: 4pt; }
+
+      .earlier {
+        font-size: 8.5pt;
+        padding: 6pt 8pt;
+        border-radius: 6pt;
+      }
+
+      .featured {
+        border-radius: 6pt;
+        break-inside: avoid;
+      }
+
+      .featured-body { padding: 8pt 10pt; }
+      .featured h3 { font-size: 10pt; margin-bottom: 3pt; }
+      .featured p { font-size: 8.75pt; line-height: 1.4; }
+      .results { margin: 5pt 0 0; gap: 4pt; }
+      .result { font-size: 8pt; padding: 2pt 6pt; border-radius: 4pt; background: #eff6ff; }
+
+      .side h3 { font-size: 8.5pt; margin: 6pt 0 1pt; }
+      .chips { display: block; font-size: 8pt; line-height: 1.45; color: #3f3f46; }
+      .chip {
+        display: inline;
+        font-size: 8pt;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        background: none;
+      }
+      .chip:not(:last-child)::after { content: ' · '; color: #a1a1aa; }
+      .entry { margin-bottom: 6pt; break-inside: avoid; }
+      .entry-title { font-size: 8.5pt; }
+      .entry-sub { font-size: 7.75pt; }
+      .plain-list { gap: 3pt; }
+      .plain-list li { font-size: 8pt; }
+
+      a { text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <header class="top">
+    <div class="top-inner wrap">
+      <a href="index.html">← orimiller.github.io</a>
+      <button class="pdf-btn" type="button" onclick="window.print()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+        Save as PDF
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow"><span class="pulse"></span>Robotics Engineer</p>
+        <h1>Ori Miller</h1>
+        <p class="pitch">I build autonomy for robots that work around people: ground robots, drones, and quadrupeds that <strong>learn</strong>, <strong>perceive</strong>, and <strong>coordinate</strong>.</p>
+        <div class="meta">
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+            Albuquerque, NM · Open to relocation
+          </span>
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342"/></svg>
+            M.S. Computer Science (Robotics)
+          </span>
+        </div>
+        <p class="print-only contact-line">linkedin.com/in/ori-miller-du · github.com/OriMiller · orimiller.github.io</p>
+        <div class="actions">
+          <a class="btn primary" href="https://linkedin.com/in/ori-miller-du" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            Connect on LinkedIn
+          </a>
+          <a class="btn" href="https://github.com/OriMiller" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+          <a class="btn" href="index.html">Portfolio</a>
+        </div>
+      </div>
+      <figure class="hero-photo">
+        <img src="images/web/warthog-wipp.jpg" alt="Ori Miller in the field with a Sandia National Laboratories Warthog ground robot, holding its controller">
+        <figcaption>Field-testing a Warthog UGV · Sandia National Laboratories</figcaption>
+      </figure>
+    </section>
+
+    <section class="stats" aria-label="At a glance">
+      <div class="stat">
+        <p class="num">5+ years</p>
+        <p class="what">Robotics R&amp;D</p>
+        <p class="detail">Sandia National Labs, Army Research Lab, University of Denver</p>
+      </div>
+      <div class="stat">
+        <p class="num">4 papers</p>
+        <p class="what">Published research</p>
+        <p class="detail">IEEE SSRR · ACM THRI · two ICRA workshops</p>
+      </div>
+      <div class="stat">
+        <p class="num">5 platforms</p>
+        <p class="what">Robot platforms run</p>
+        <p class="detail">Spot · Jackal · Warthog · TurtleBot · Crazyflie</p>
+      </div>
+      <div class="stat">
+        <p class="num">Sim → Real</p>
+        <p class="what">Learned policies, deployed</p>
+        <p class="detail">Took multi-agent RL from a 2D training world to a 3D ROS robot stack</p>
+      </div>
+    </section>
+
+    <section class="strengths">
+      <h2 class="label">What I bring</h2>
+      <div class="strength-grid">
+        <div class="strength">
+          <div class="strength-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+          </div>
+          <h3>Reinforcement learning</h3>
+          <p>Multi-agent policies (MADDPG) and the sim-to-real work to make them run in 3D.</p>
+        </div>
+        <div class="strength">
+          <div class="strength-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <h3>Computer vision</h3>
+          <p>Person detection, tracking, and localization; LiDAR–camera fusion; EKF.</p>
+        </div>
+        <div class="strength">
+          <div class="strength-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
+          </div>
+          <h3>Navigation</h3>
+          <p>GPS-denied navigation in underground mines; SLAM and path planning.</p>
+        </div>
+        <div class="strength">
+          <div class="strength-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+          </div>
+          <h3>Multi-robot systems</h3>
+          <p>Air–ground teams that split the work: one robot sees, the other acts.</p>
+        </div>
+        <div class="strength">
+          <div class="strength-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+          </div>
+          <h3>Human-robot interaction</h3>
+          <p>AR interfaces for robot perception and user studies with real participants.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="columns">
+      <div class="main-col">
+
+        <section class="block">
+          <h2 class="label">Experience</h2>
+
+          <article class="role current">
+            <div class="role-head">
+              <div>
+                <h3>Autonomy &amp; Counter-Autonomy Researcher</h3>
+                <p class="org">Sandia National Laboratories · Albuquerque, NM</p>
+              </div>
+              <span class="when">Aug 2024 – Present</span>
+            </div>
+            <ul>
+              <li><strong>Autonomous testing:</strong> lead workflows that use Boston Dynamics Spot to evaluate and calibrate physical security sensors.</li>
+              <li><strong>Red teaming:</strong> probe physical security systems with autonomous and semi-autonomous robots to expose adversarial exploitation paths.</li>
+              <li><strong>Counter-autonomy:</strong> research techniques to detect, mitigate, and defend against adversarial robots.</li>
+            </ul>
+          </article>
+
+          <article class="role">
+            <div class="role-head">
+              <div>
+                <h3>Graduate Research Assistant</h3>
+                <p class="org">University of Denver · ARISE Lab</p>
+              </div>
+              <span class="when">Mar 2022 – Aug 2024</span>
+            </div>
+            <ul>
+              <li><strong>Multi-robot coordination:</strong> designed FORWARD-PF, a predictive waypoint-assignment algorithm that has a ground robot and a drone jointly follow a person. It completed 9 of 9 test paths, versus 7 for a multi-agent RL policy and 3 for a single-robot baseline, and reached the person 1.95× faster than the RL policy.</li>
+              <li><strong>Reinforcement learning:</strong> trained MADDPG multi-agent policies and moved them from a 2D training world to a 3D ROS autonomy stack by redesigning their actions, observations, and coordinate scale.</li>
+              <li><strong>Navigation:</strong> demonstrated GPS-denied, human-safe robot navigation in sparsely featured underground mines.</li>
+              <li><strong>Hardware &amp; publication:</strong> validated on a Clearpath Jackal and Crazyflie drone; published at IEEE SSRR 2024.</li>
+            </ul>
+          </article>
+
+          <article class="role">
+            <div class="role-head">
+              <div>
+                <h3>Journeyman Fellow</h3>
+                <p class="org">U.S. Army DEVCOM Army Research Laboratory · Adelphi, MD</p>
+              </div>
+              <span class="when">Mar 2022 – Jun 2023</span>
+            </div>
+            <ul>
+              <li>Built a heterogeneous air–ground robot system with person-following capabilities; presented at ICRA 2023 in London.</li>
+            </ul>
+          </article>
+
+          <article class="role">
+            <div class="role-head">
+              <div>
+                <h3>Undergraduate Research Assistant</h3>
+                <p class="org">University of Denver · ARISE Lab</p>
+              </div>
+              <span class="when">Jan 2021 – Mar 2022</span>
+            </div>
+            <ul>
+              <li>Developed person-following for a holonomic ground robot and ran HRI studies with human participants; awarded a Partners in Scholarship (PiNS) research grant.</li>
+            </ul>
+          </article>
+
+          <p class="earlier"><strong>Earlier:</strong> Software Engineer Intern, Trimble (2021): led an AWS event-notification service handling 250,000 messages a day (Python, Terraform, ECS, Lambda, SQS). Software Development Intern, Centene (2019): broke a monolith into Go microservices.</p>
+        </section>
+
+        <section class="block">
+          <h2 class="label">Featured project</h2>
+          <article class="featured">
+            <img src="images/web/thesis/fig-realworld.jpg" alt="Hardware validation in the lab beside its RViz view: a person, a Jackal ground robot, and a Crazyflie drone circled in yellow, red, and blue" loading="lazy">
+            <div class="featured-body">
+              <p class="featured-tag">M.S. thesis · IEEE SSRR 2024</p>
+              <h3>Two robots, one person to follow</h3>
+              <p>A slow, sensor-rich ground robot and a fast micro-drone share the job of following a person through cluttered spaces where GPS and overhead views aren't available. I designed the coordination algorithm, compared it against multi-agent RL and a single-robot baseline, and validated it on real hardware.</p>
+              <div class="results">
+                <span class="result"><strong>9/9</strong> paths completed</span>
+                <span class="result"><strong>1.95×</strong> faster than RL</span>
+                <span class="result"><strong>89%</strong> success on the hardest paths</span>
+              </div>
+              <a class="text-link" href="thesis.html">See the illustrated thesis →</a>
+            </div>
+          </article>
+        </section>
+
+      </div>
+
+      <aside class="side">
+
+        <section class="block">
+          <h2 class="label">Skills</h2>
+          <h3>Learning</h3>
+          <div class="chips">
+            <span class="chip">Multi-agent RL</span>
+            <span class="chip">MADDPG</span>
+            <span class="chip">PettingZoo / Gym</span>
+            <span class="chip">Sim-to-real transfer</span>
+          </div>
+          <h3>Perception</h3>
+          <div class="chips">
+            <span class="chip">Detection &amp; tracking</span>
+            <span class="chip">LiDAR–camera fusion</span>
+            <span class="chip">Monocular ranging</span>
+            <span class="chip">EKF</span>
+          </div>
+          <h3>Navigation &amp; planning</h3>
+          <div class="chips">
+            <span class="chip">SLAM</span>
+            <span class="chip">Occupancy grids</span>
+            <span class="chip">Global / local planners</span>
+            <span class="chip">Motion prediction</span>
+          </div>
+          <h3>Software</h3>
+          <div class="chips">
+            <span class="chip">Python</span>
+            <span class="chip">ROS</span>
+            <span class="chip">RViz</span>
+            <span class="chip">Unity</span>
+            <span class="chip">Go</span>
+            <span class="chip">AWS</span>
+            <span class="chip">Terraform</span>
+          </div>
+          <h3>Hardware</h3>
+          <div class="chips">
+            <span class="chip">Boston Dynamics Spot</span>
+            <span class="chip">Clearpath Jackal &amp; Warthog</span>
+            <span class="chip">TurtleBot</span>
+            <span class="chip">Crazyflie</span>
+            <span class="chip">Velodyne LiDAR</span>
+            <span class="chip">Intel RealSense</span>
+            <span class="chip">OptiTrack</span>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2 class="label">Education</h2>
+          <div class="entry">
+            <p class="entry-title">M.S. Computer Science (Robotics)</p>
+            <p class="entry-sub">University of Denver · 2022–2024</p>
+            <p class="entry-sub">Thesis: <a href="thesis.html">Heterogeneous Multi-Robot Person-Following in Constrained Environments</a></p>
+          </div>
+          <div class="entry">
+            <p class="entry-title">B.S. Computer Science</p>
+            <p class="entry-sub">University of Denver · 2018–2022</p>
+            <p class="entry-sub">Minors in Mathematics and Entrepreneurship Management</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2 class="label">Publications</h2>
+          <div class="entry">
+            <p class="entry-title"><a href="papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" target="_blank" rel="noopener">Heterogeneous Multi-Robot Person-Following in Constrained Environments</a></p>
+            <p class="entry-sub"><span class="venue">IEEE SSRR 2024</span> · first author</p>
+          </div>
+          <div class="entry">
+            <p class="entry-title"><a href="papers/Augmented_Reality_Visualization_of_Auton.pdf" target="_blank" rel="noopener">Augmented Reality Visualization of Autonomous Mobile Robot Change Detection in Uninstrumented Environments</a></p>
+            <p class="entry-sub"><span class="venue">ACM THRI 2023</span> · co-author</p>
+          </div>
+          <div class="entry">
+            <p class="entry-title"><a href="papers/Ori_ICRA_Workshop_Multi_Robot_2023.pdf" target="_blank" rel="noopener">Teaming Heterogeneous Ground and Micro-Aerial Robots for Following of Non-Cooperative Agents</a></p>
+            <p class="entry-sub"><span class="venue">ICRA 2023 Workshop</span> · first author</p>
+          </div>
+          <div class="entry">
+            <p class="entry-title"><a href="papers/Ori_ICRA_Workshop_HRT_2023.pdf" target="_blank" rel="noopener">Autonomous Agent-aware Navigation in Underground Mine Environments</a></p>
+            <p class="entry-sub"><span class="venue">ICRA 2023 Workshop</span> · first author</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2 class="label">Beyond the lab</h2>
+          <ul class="plain-list">
+            <li><strong>Recognition:</strong> Partners in Scholarship (PiNS) research grant; presenter at two ICRA 2023 workshops.</li>
+            <li><strong>Outside work:</strong> climbing, skiing, fly fishing, gravel biking, trail running, ultimate frisbee, and photography.</li>
+          </ul>
+        </section>
+
+      </aside>
+    </div>
+
+    <section class="cta">
+      <h2>Let's build robots that work with people.</h2>
+      <p>I'm looking for robotics engineering roles in reinforcement learning, perception, navigation, multi-robot systems, and human-robot interaction.</p>
+      <div class="actions">
+        <a class="btn primary" href="https://linkedin.com/in/ori-miller-du" target="_blank" rel="noopener">Connect on LinkedIn</a>
+        <button class="btn" type="button" onclick="window.print()">Save as PDF</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>&copy; 2026 Ori Miller · <a href="index.html">orimiller.github.io</a></p>
+    </div>
+  </footer>
+</body>
+</html>
