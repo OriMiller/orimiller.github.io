@@ -8,7 +8,7 @@
   <meta name="description" content="Résumé of Ori Miller, robotics engineer: reinforcement learning, computer vision, navigation, multi-robot systems, and human-robot interaction.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@1,8..60,400;1,8..60,600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after {
       margin: 0;
@@ -17,22 +17,25 @@
     }
 
     :root {
-      --bg: #0a0a0a;
-      --surface: #141414;
-      --surface-hover: #1a1a1a;
-      --border: #262626;
-      --text: #fafafa;
-      --text-secondary: #a1a1aa;
-      --accent: #3b82f6;
-      --accent-hover: #60a5fa;
-      --gradient-start: #3b82f6;
-      --gradient-end: #8b5cf6;
+      --bg: #111915;
+      --surface: #17211b;
+      --surface-hover: #1d2a22;
+      --border: #2a392f;
+      --text: #ede6d6;
+      --text-secondary: #a4a794;
+      --accent: #f2b441;
+      --accent-hover: #f8c867;
+      --gradient-start: #f2b441;
+      --gradient-end: #c8642c;
+      --water: #8dbdd6;
+      --serif: 'Source Serif 4', Georgia, serif;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
@@ -64,7 +67,7 @@
     /* Top bar */
     .top {
       border-bottom: 1px solid var(--border);
-      background: rgba(10, 10, 10, 0.85);
+      background: rgba(17, 25, 21, 0.88);
       backdrop-filter: blur(8px);
       position: sticky;
       top: 0;
@@ -123,7 +126,7 @@
       left: -80px;
       width: min(560px, 100vw);
       height: min(560px, 100vw);
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.09) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(242, 180, 65, 0.09) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -150,9 +153,9 @@
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
-      70% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(242, 180, 65, 0.5); }
+      70% { box-shadow: 0 0 0 8px rgba(242, 180, 65, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(242, 180, 65, 0); }
     }
 
     h1 {
@@ -243,7 +246,7 @@
       border-radius: 18px;
       overflow: hidden;
       border: 1px solid var(--border);
-      box-shadow: 0 0 60px rgba(59, 130, 246, 0.12);
+      box-shadow: 0 0 60px rgba(242, 180, 65, 0.12);
     }
 
     .hero-photo img {
@@ -259,7 +262,7 @@
       bottom: 0;
       padding: 28px 16px 12px;
       font-size: 0.75rem;
-      color: #e4e4e7;
+      color: #ede6d6;
       background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
     }
 
@@ -349,7 +352,7 @@
       width: 32px;
       height: 32px;
       border-radius: 9px;
-      background: rgba(59, 130, 246, 0.12);
+      background: rgba(242, 180, 65, 0.12);
       color: var(--accent-hover);
       display: flex;
       align-items: center;
@@ -529,8 +532,8 @@
     .result {
       font-size: 0.78rem;
       color: var(--text-secondary);
-      background: rgba(59, 130, 246, 0.08);
-      border: 1px solid rgba(59, 130, 246, 0.22);
+      background: rgba(242, 180, 65, 0.08);
+      border: 1px solid rgba(242, 180, 65, 0.22);
       border-radius: 8px;
       padding: 5px 10px;
     }
@@ -622,8 +625,8 @@
     /* Closing CTA */
     .cta {
       text-align: center;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: linear-gradient(135deg, rgba(242, 180, 65, 0.12) 0%, rgba(200, 100, 44, 0.08) 100%);
+      border: 1px solid rgba(242, 180, 65, 0.3);
       border-radius: 20px;
       padding: 40px 24px;
       margin-bottom: 56px;
@@ -682,6 +685,45 @@
     }
 
     /* Print: a clean, light résumé when saved as PDF */
+    /* Photo mosaic of outdoor shots behind everything below the map, in natural color but shaded.
+       It dims further while a reading panel fills the middle of the screen. */
+    .mosaic {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 0;
+      display: grid; gap: 5px; padding: 5px; grid-auto-flow: dense;
+      will-change: transform; transition: opacity 0.9s ease;
+    }
+    .mosaic.reading { opacity: 0.45; }
+    .tile { position: relative; overflow: hidden; border-radius: 6px; background: #1b2620; cursor: zoom-in; }
+    .tile img { width: 100%; height: 100%; object-fit: cover; }
+    .tile::after { content: ''; position: absolute; inset: 0; background: rgba(8, 12, 10, 0.56); transition: opacity 0.35s ease; pointer-events: none; }
+    .tile.lit { z-index: 2; box-shadow: 0 0 0 2px var(--route); }
+    .tile.lit::after { opacity: 0; }
+
+
+    /* Topo theme: gold reads on dark green, so buttons carry dark ink; the page sits on one panel over the photos */
+    .btn.primary, .btn.primary:hover { color: #1d1404; }
+    a { color: var(--water); }
+    .top { z-index: 260; }
+    main.wrap {
+      position: relative; z-index: 1; margin: 48px auto 0; padding: 0 48px 40px; overflow: hidden;
+      background: rgba(17, 25, 21, 0.97); border: 1px solid rgba(42, 57, 47, 0.9); border-radius: 20px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    }
+    footer { position: relative; z-index: 1; border-top: 0; }
+    .hero::before { display: none; }
+    .hero > canvas.contours {
+      position: absolute; top: 0; bottom: 0; left: -48px; right: -48px; width: calc(100% + 96px); height: 100%;
+      -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent);
+    }
+    .hero > canvas.contours + * { position: relative; }
+    .hero-photo { position: relative; }
+    .hero-photo figcaption { font-family: var(--serif); font-style: italic; }
+    @media (max-width: 720px) {
+      main.wrap { margin: 20px 10px 0; padding: 0 20px 28px; border-radius: 14px; }
+      .hero > canvas.contours { left: -20px; right: -20px; width: calc(100% + 40px); }
+    }
+    @media (prefers-reduced-motion: reduce) { .mosaic { transition: none; } }
+
     @media print {
       @page { size: letter; margin: 0.45in 0.5in; }
 
@@ -691,8 +733,8 @@
         --border: #d4d4d8;
         --text: #111111;
         --text-secondary: #3f3f46;
-        --accent: #1d4ed8;
-        --accent-hover: #1d4ed8;
+        --accent: #2f5b45;
+        --accent-hover: #2f5b45;
       }
 
       html, body {
@@ -708,12 +750,13 @@
         transition: none !important;
       }
 
-      .noise, .top, .hero-photo, .hero::before, .actions, .featured img,
+      .mosaic, canvas.contours, .noise, .top, .hero-photo, .hero::before, .actions, .featured img,
       .text-link, .cta, footer, .strength-icon { display: none !important; }
 
       .print-only { display: block; }
 
       .wrap { max-width: none; padding: 0; }
+      main.wrap { margin: 0; background: none; border: 0; border-radius: 0; overflow: visible; }
 
       .hero {
         display: block;
@@ -742,7 +785,7 @@
 
       .contact-line {
         font-size: 8.5pt;
-        color: #1d4ed8;
+        color: #2f5b45;
       }
 
       .stats {
@@ -760,8 +803,8 @@
       .stat .num {
         font-size: 15pt;
         background: none;
-        -webkit-text-fill-color: #1d4ed8;
-        color: #1d4ed8;
+        -webkit-text-fill-color: #2f5b45;
+        color: #2f5b45;
       }
 
       .stat .what { font-size: 8.5pt; margin-top: 0; }
@@ -770,7 +813,7 @@
       .label {
         font-size: 8pt;
         margin-bottom: 6pt;
-        color: #1d4ed8;
+        color: #2f5b45;
       }
 
       .strengths { margin-bottom: 12pt; }
@@ -828,7 +871,7 @@
       .featured h3 { font-size: 10pt; margin-bottom: 3pt; }
       .featured p { font-size: 8.75pt; line-height: 1.4; }
       .results { margin: 5pt 0 0; gap: 4pt; }
-      .result { font-size: 8pt; padding: 2pt 6pt; border-radius: 4pt; background: #eff6ff; }
+      .result { font-size: 8pt; padding: 2pt 6pt; border-radius: 4pt; background: #eef3ee; }
 
       .side h3 { font-size: 8.5pt; margin: 6pt 0 1pt; }
       .chips { display: block; font-size: 8pt; line-height: 1.45; color: #3f3f46; }
@@ -852,7 +895,7 @@
   </style>
 </head>
 <body>
-  <div class="noise"></div>
+  <div class="mosaic" id="mosaic" aria-hidden="true"></div>
 
   <header class="top">
     <div class="top-inner wrap">
@@ -866,7 +909,8 @@
 
   <main class="wrap">
 
-    <section class="hero">
+    <section class="hero" data-contours>
+      <canvas class="contours" aria-hidden="true"></canvas>
       <div class="hero-text">
         <p class="eyebrow"><span class="pulse"></span>Robotics Engineer</p>
         <h1>Ori Miller</h1>
@@ -1158,5 +1202,213 @@
       <p>&copy; 2026 Ori Miller · <a href="index.html">orimiller.github.io</a></p>
     </div>
   </footer>
+  <script>
+    /* ---------- Contour header: a quiet topo map drawn behind the page title ---------- */
+    (() => {
+      const host = document.querySelector('[data-contours]');
+      if (!host) return;
+      const canvas = host.querySelector('canvas.contours');
+      const ctx = canvas.getContext('2d');
+      const CELL = 6;
+      let lastW = 0;
+      const hash = (x, y) => { let n = Math.imul(x, 374761393) ^ Math.imul(y, 668265263); n = Math.imul(n ^ (n >>> 13), 1274126177); return ((n ^ (n >>> 16)) >>> 0) / 4294967296; };
+      const ease = t => t * t * (3 - 2 * t);
+      const noise = (x, y) => { const ix = Math.floor(x), iy = Math.floor(y), fx = ease(x - ix), fy = ease(y - iy); const a = hash(ix, iy), b = hash(ix + 1, iy), c = hash(ix, iy + 1), d = hash(ix + 1, iy + 1); return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy; };
+      const fbm = (x, y) => { let s = 0, amp = 0.5, f = 1; for (let o = 0; o < 5; o++) { s += amp * noise(x * f + o * 17.3, y * f - o * 9.1); f *= 2.03; amp *= 0.5; } return s; };
+      function draw() {
+        const W = host.clientWidth, H = host.clientHeight, dpr = Math.min(window.devicePixelRatio || 1, 2);
+        lastW = W;
+        canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const cols = Math.ceil(W / CELL) + 1, rows = Math.ceil(H / CELL) + 1, h = new Float32Array(cols * rows);
+        const peaks = [{ x: W * 0.82, y: H * 0.3, a: 1, s: Math.max(W, 700) * 0.2 }, { x: W * 0.62, y: H * 0.85, a: 0.5, s: Math.max(W, 700) * 0.14 }, { x: W * 0.12, y: H * 0.1, a: 0.35, s: Math.max(W, 700) * 0.16 }];
+        let min = Infinity, max = -Infinity;
+        for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+          const x = i * CELL, y = j * CELL;
+          let v = 0.6 * (fbm(x / 330, y / 330) - 0.5);
+          for (const p of peaks) v += p.a * Math.exp(-((x - p.x) ** 2 + (y - p.y) ** 2) / (2 * p.s * p.s));
+          h[j * cols + i] = v; if (v < min) min = v; if (v > max) max = v;
+        }
+        const n = 26, step = (max - min) / n;
+        for (let k = 1; k < n; k++) {
+          const L = min + k * step;
+          ctx.beginPath();
+          for (let j = 0; j < rows - 1; j++) for (let i = 0; i < cols - 1; i++) {
+            const a = h[j * cols + i], b = h[j * cols + i + 1], c = h[(j + 1) * cols + i + 1], d = h[(j + 1) * cols + i];
+            const code = (a > L ? 8 : 0) | (b > L ? 4 : 0) | (c > L ? 2 : 0) | (d > L ? 1 : 0);
+            if (code === 0 || code === 15) continue;
+            const x = i * CELL, y = j * CELL;
+            const T = () => [x + CELL * (L - a) / (b - a), y], R = () => [x + CELL, y + CELL * (L - b) / (c - b)];
+            const B = () => [x + CELL * (L - d) / (c - d), y + CELL], Lf = () => [x, y + CELL * (L - a) / (d - a)];
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            switch (code) {
+              case 1: case 14: seg(Lf(), B()); break;
+              case 2: case 13: seg(B(), R()); break;
+              case 3: case 12: seg(Lf(), R()); break;
+              case 4: case 11: seg(T(), R()); break;
+              case 5: seg(Lf(), T()); seg(B(), R()); break;
+              case 6: case 9: seg(T(), B()); break;
+              case 7: case 8: seg(Lf(), T()); break;
+              case 10: seg(Lf(), B()); seg(T(), R()); break;
+            }
+          }
+          const index = k % 5 === 0;
+          ctx.strokeStyle = index ? 'rgba(170, 120, 72, 0.5)' : 'rgba(128, 90, 56, 0.3)';
+          ctx.lineWidth = index ? 1.2 : 0.8;
+          ctx.stroke();
+        }
+        // Aspen groves
+        ctx.fillStyle = 'rgba(242, 180, 65, 0.5)';
+        ctx.beginPath();
+        for (let j = 1; j < rows - 1; j++) for (let i = 1; i < cols - 1; i++) {
+          const v = h[j * cols + i];
+          if (v < min + (max - min) * 0.22 || v > min + (max - min) * 0.55) continue;
+          const x = i * CELL, y = j * CELL, grove = fbm(x / 110 + 40, y / 110 - 12);
+          if (grove < 0.58 || hash(i * 7 + 3, j * 13 + 1) > (grove - 0.58) * 3.2) continue;
+          ctx.moveTo(x + 1.1, y); ctx.arc(x, y, 1.1, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+      let t;
+      window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { if (Math.abs(host.clientWidth - lastW) > 2) draw(); }, 160); });
+      draw();
+    })();
+
+    /* ---------- Photo mosaic: parallax, quieter while reading, click a tile to open it ---------- */
+    (() => {
+      // Outdoor photos only: [file, in outdoors/?, shape (w = landscape, p = portrait, pano), caption]
+      const PHOTOS = [
+        ['balloon-fiesta', 1, 'w', 'Balloon Fiesta week over downtown Albuquerque.'],
+        ['boulder-mountain', 1, 'w', 'The view from Boulder Mountain, Utah.'],
+        ['bryce-wall-street', 1, 'w', 'Wall Street switchbacks, Bryce Canyon.'],
+        ['canyonlands', 1, 'w', 'Canyonlands, Utah.'],
+        ['capitol-reef-sulphur-creek', 1, 'w', 'Sulphur Creek, Capitol Reef.'],
+        ['cascades-night-sky', 1, 'w', 'A shooting star over the Cascades.'],
+        ['cloud-capped-range', 1, 'w', 'Cloud-capped peaks in southern New Mexico.'],
+        ['comet-falls', 1, 'p', 'Comet Falls, Mount Rainier.'],
+        ['delicate-arch', 1, 'p', 'Delicate Arch, Arches National Park.'],
+        ['eastern-sierra-pasture', 1, 'w', 'Cattle grazing below the Eastern Sierra.'],
+        ['elbert-above-clouds', 1, 'w', 'Above the clouds on the way up Mount Elbert.'],
+        ['elbert-summit', 1, 'w', 'On top of Mount Elbert, Colorado’s highest peak.'],
+        ['golden-gate-fog', 1, 'w', 'Fog swallowing the Golden Gate Bridge.'],
+        ['golden-gate-rocks', 1, 'w', 'The Golden Gate through the fog, San Francisco.'],
+        ['grand-canyon-rainbow', 1, 'p', 'A rainbow over the Grand Canyon from Grandview Point.'],
+        ['half-dome-alpenglow', 1, 'w', 'Last light on Half Dome, Yosemite Valley.'],
+        ['hobby-biking', 0, 'w', 'Fall gravel miles through the aspens.'],
+        ['hobby-climbing', 0, 'p', 'On belay under New Mexico skies.'],
+        ['hobby-flyfishing', 0, 'w', 'Casting on the Merced River below El Capitan, Yosemite.'],
+        ['hobby-photography', 0, 'w', 'Through the lens: a hummingbird posing at a feeder.'],
+        ['hobby-running', 0, 'p', 'Sunset trail run in the foothills.'],
+        ['hobby-skiing', 0, 'w', 'Scoping lines on a backcountry day in the Rockies.'],
+        ['idaho-sage-hike', 1, 'p', 'A sagebrush climb above Sun Valley, Idaho.'],
+        ['manzano-storm-light', 1, 'pano', 'Storm light over the mountains south of Albuquerque.'],
+        ['moab-red-road', 1, 'p', 'Red dirt road outside Moab.'],
+        ['olmsted-half-dome', 1, 'w', 'Half Dome from Olmsted Point, Yosemite.'],
+        ['owens-river', 1, 'w', 'Trout water in Long Valley, Eastern Sierra.'],
+        ['pacific-fog-coast', 1, 'w', 'Fog on the Pacific coast.'],
+        ['point-bonita', 1, 'p', 'The footbridge to Point Bonita Lighthouse.'],
+        ['rio-grande-gorge', 1, 'p', 'The Rio Grande Gorge near Taos.'],
+        ['rollins-pass-fog', 1, 'w', 'October fog on Rollins Pass, Colorado.'],
+        ['san-luis-cottonwoods', 1, 'w', 'Cottonwoods along a San Luis Valley highway.'],
+        ['sedona-cathedral-rock', 1, 'w', 'Cathedral Rock at golden hour, Sedona.'],
+        ['sierra-camp-coffee', 1, 'w', 'Camp coffee above a Sierra lake.'],
+        ['sierra-dusk', 1, 'p', 'Dusk over the Eastern Sierra.'],
+        ['sierra-meadow-creek', 1, 'w', 'A meadow creek in the Eastern Sierra.'],
+        ['ski-lift-snow', 1, 'p', 'Snow-loaded firs from the chairlift.'],
+        ['sun-valley-hills', 1, 'p', 'Summer clouds over the hills near Sun Valley, Idaho.'],
+        ['tanzania-bush-plane', 1, 'p', 'Over northern Tanzania by small plane.'],
+        ['taos-peaks', 1, 'w', 'Taos Ski Valley, New Mexico.'],
+        ['taos-ridge', 1, 'p', 'Weather on the ridge at Taos Ski Valley.'],
+        ['telluride-chute', 1, 'w', 'Chute skiing at Telluride.'],
+        ['utah-pink-cliffs', 1, 'w', 'Pink cliffs at dusk, southern Utah.'],
+        ['west-texas-windmill', 1, 'p', 'A water-pumping windmill in the West Texas desert.'],
+        ['yosemite-meadow', 1, 'w', 'A Yosemite Valley meadow below the granite walls.'],
+        ['zion-canyon', 1, 'p', 'Zion Canyon from the trail.']
+      ];
+      const mosaic = document.getElementById('mosaic');
+      const panels = [...document.querySelectorAll('main.wrap')];
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const RATE = reduce ? 0 : 0.22;
+      let lastW = 0, builtFor = 0;
+
+      // Same shuffle on every visit, so the wall feels composed rather than random
+      let seed = 1004;
+      const rand = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+      const order = PHOTOS.slice();
+      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+
+      const io = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { const img = e.target; img.src = img.dataset.src; io.unobserve(img); } });
+      }, { rootMargin: '40% 0px' }) : null;
+
+      function build() {
+        const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+        const cols = Math.max(3, Math.min(9, Math.round(vw / 185)));
+        const colW = (vw - 10 - (cols - 1) * 5) / cols;
+        const rowH = Math.round(colW * 0.72);
+        const docH = document.documentElement.scrollHeight;
+        const rows = Math.ceil((vh + RATE * Math.max(0, docH - vh)) / (rowH + 5)) + 2;
+        mosaic.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        mosaic.style.gridAutoRows = rowH + 'px';
+        mosaic.textContent = '';
+        let cells = cols * rows, k = 0;
+        while (cells > 0) {
+          const [file, outdoors, shape, caption] = order[k % order.length];
+          let cs = 1, rs = 1;
+          if (shape === 'p') rs = 2;
+          else if (shape === 'pano') cs = 2;
+          else if (k % 9 === 4 && cols >= 4) { cs = 2; rs = 2; }
+          else if (k % 4 === 1) cs = 2;
+          k++;
+          cells -= cs * rs;
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.style.gridColumn = `span ${cs}`; tile.style.gridRow = `span ${rs}`;
+          tile.dataset.photo = `images/web/${outdoors ? 'outdoors/' : ''}${file}.jpg`;
+          tile.dataset.caption = caption;
+          const img = document.createElement('img');
+          img.alt = ''; img.decoding = 'async';
+          img.dataset.src = `images/web/mosaic/${file}.jpg`;
+          tile.appendChild(img);
+          mosaic.appendChild(tile);
+          if (io) io.observe(img); else img.src = img.dataset.src;
+        }
+        lastW = vw; builtFor = docH;
+        place();
+      }
+
+      function place() {
+        mosaic.style.transform = RATE ? `translate3d(0, ${-window.scrollY * RATE}px, 0)` : '';
+        // If the page grew after the wall was laid out, extend it rather than show bare ground
+        if (mosaic.getBoundingClientRect().bottom < window.innerHeight - 4 && document.documentElement.scrollHeight > builtFor + 40) { build(); return; }
+        const mid = window.innerHeight / 2;
+        const reading = panels.some(p => { const r = p.getBoundingClientRect(); return r.top < mid && r.bottom > mid; });
+        mosaic.classList.toggle('reading', reading);
+      }
+
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) { ticking = true; requestAnimationFrame(() => { place(); ticking = false; }); }
+      }, { passive: true });
+      let timer;
+      window.addEventListener('resize', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { if (Math.abs(document.documentElement.clientWidth - lastW) > 2) build(); else place(); }, 180);
+      });
+      // Page height settles once fonts and photos arrive; grow the wall if the page did
+      window.addEventListener('load', () => { if (document.documentElement.scrollHeight > builtFor + 200) build(); });
+
+      // Pointing at a tile lifts its shade; clicking grows it into the photo viewer
+      mosaic.addEventListener('mouseover', e => { const t = e.target.closest('.tile'); if (t) t.classList.add('lit'); });
+      mosaic.addEventListener('mouseout', e => { const t = e.target.closest('.tile'); if (t) t.classList.remove('lit'); });
+      mosaic.addEventListener('click', e => {
+        const t = e.target.closest('.tile');
+        if (!t) return;
+        window.open(t.dataset.photo, '_blank', 'noopener');
+      });
+
+      build();
+    })();
+  </script>
 </body>
 </html>
