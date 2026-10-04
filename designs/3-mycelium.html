@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ori Miller — Robotics Researcher</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e49b37' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M12 9c0-3 2-5 4-6M9.5 13.5C7 15 5 15 3 14M14.5 13.5c1 2.5 3 4 5 4.5M12 15c-.5 3-2 5-3 6'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* Forest floor in October: dark soil, moss, lichen, pale hyphae,
+       chanterelle gold where things connect, and a little fly-agaric red. */
+    :root {
+      --soil: #13120e;
+      --moss: #1b2018;
+      --root: #2f3527;
+      --hypha: #ece3d0;
+      --lichen: #a9b09a;
+      --chanterelle: #e49b37;
+      --amanita: #cf5a3c;
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      background: var(--soil);
+      color: var(--hypha);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: var(--chanterelle); text-underline-offset: 3px; }
+    :focus-visible { outline: 2px solid var(--chanterelle); outline-offset: 3px; border-radius: 6px; }
+
+    h1, h2, h3.serif {
+      font-family: var(--serif);
+      font-variation-settings: "SOFT" 100, "WONK" 1;
+      font-optical-sizing: auto;
+    }
+
+    .minibar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 250;
+      background: rgba(19, 18, 14, 0.86); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--root);
+      transform: translateY(-100%); transition: transform 0.3s ease;
+    }
+    .minibar.show { transform: translateY(0); }
+    .minibar-inner { max-width: 1040px; margin: 0 auto; padding: 11px 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    .minibar .name { font-family: var(--serif); font-weight: 600; font-variation-settings: "SOFT" 100; color: var(--hypha); text-decoration: none; white-space: nowrap; }
+    .minibar nav { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; }
+    .minibar nav::-webkit-scrollbar { display: none; }
+    .minibar nav a { font-size: 0.82rem; color: var(--lichen); text-decoration: none; white-space: nowrap; }
+    .minibar nav a:hover { color: var(--chanterelle); }
+
+    /* Hero: hyphae grow out from the portrait to people and robots */
+    .hero { position: relative; min-height: 100svh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 20px 72px; }
+    .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .hero::after {
+      content: ''; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+      width: min(900px, 100%); height: 58%; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 70%, rgba(19, 18, 14, 0.94) 30%, rgba(19, 18, 14, 0) 70%);
+    }
+    .portrait {
+      position: relative; z-index: 2;
+      width: clamp(150px, 17vw, 230px); aspect-ratio: 1; border-radius: 50%;
+      padding: 3px; background: var(--chanterelle);
+      box-shadow: 0 0 0 8px rgba(228, 155, 55, 0.12), 0 0 60px rgba(228, 155, 55, 0.25);
+    }
+    .portrait img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .hero-text { position: relative; z-index: 2; text-align: center; margin-top: 30px; max-width: 620px; }
+    .hero h1 { font-size: clamp(2.75rem, 7vw, 4.6rem); font-weight: 560; line-height: 1; letter-spacing: -0.02em; margin-bottom: 18px; }
+    .tagline { font-size: 1.1rem; color: #d9d1bf; max-width: 46ch; margin: 0 auto 14px; }
+    .place { font-family: var(--serif); font-style: italic; color: var(--lichen); margin-bottom: 28px; }
+    .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      height: 44px; padding: 0 18px; border-radius: 999px;
+      border: 1px solid var(--root); background: rgba(27, 32, 24, 0.9);
+      color: var(--hypha); text-decoration: none; font-weight: 500; font-size: 0.9rem;
+      transition: border-color 0.2s ease;
+    }
+    .btn:hover { border-color: var(--chanterelle); }
+    .btn.primary { background: var(--chanterelle); border-color: var(--chanterelle); color: #22160a; font-weight: 600; }
+    .btn.primary:hover { background: #efad52; }
+    .btn.icon { width: 44px; padding: 0; }
+    .btn svg { width: 18px; height: 18px; }
+
+    .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+    .wide { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 84px 0; }
+    section h2 { font-size: clamp(2rem, 4vw, 2.6rem); font-weight: 520; letter-spacing: -0.015em; line-height: 1.1; margin-bottom: 14px; }
+    .intro { color: var(--lichen); max-width: 60ch; margin-bottom: 36px; }
+
+    /* About */
+    .about { display: grid; grid-template-columns: 1.25fr 1fr; gap: 44px; align-items: center; }
+    .about p.lead { font-size: 1.06rem; line-height: 1.8; color: #d6cebb; }
+    .blob { border-radius: 58% 42% 52% 48% / 46% 56% 44% 54%; overflow: hidden; aspect-ratio: 4 / 5; }
+    .blob img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+    .about figcaption { font-family: var(--serif); font-style: italic; color: var(--lichen); font-size: 0.92rem; margin-top: 10px; text-align: center; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border-radius: 999px;
+      font: 500 0.8rem/1.4 var(--sans); background: var(--moss); border: 1px solid var(--root); color: var(--lichen);
+    }
+    button.chip { cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+    button.chip:hover { border-color: var(--chanterelle); color: var(--hypha); }
+    button.chip svg { width: 12px; height: 12px; opacity: 0.6; }
+    .field { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 40px; }
+    .field img { border-radius: 18px; aspect-ratio: 16 / 10; object-fit: cover; width: 100%; }
+    .field figcaption { font-size: 0.82rem; color: var(--lichen); margin-top: 8px; }
+
+    /* Evidence map */
+    .emap { position: relative; display: grid; grid-template-columns: 1fr 1.05fr 1fr; gap: 0 72px; align-items: center; }
+    .threads { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+    .threads path { fill: none; stroke: rgba(236, 227, 208, 0.16); stroke-width: 1.2; transition: stroke 0.25s ease, stroke-width 0.25s ease, opacity 0.25s ease; }
+    .threads path.lit { stroke: var(--chanterelle); stroke-width: 1.8; }
+    .emap.dim .threads path:not(.lit) { opacity: 0.35; }
+    .col { position: relative; z-index: 1; display: grid; gap: 12px; }
+    .emap-labels { display: grid; grid-template-columns: 1fr 1.05fr 1fr; gap: 0 72px; margin-bottom: 14px; }
+    .emap-labels span { font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--lichen); }
+    .emap-labels span:first-child { text-align: right; }
+    .emap-labels span:nth-child(2) { text-align: center; }
+    .node {
+      display: block; width: 100%; text-align: left;
+      font: 500 0.88rem/1.35 var(--sans); color: var(--hypha); text-decoration: none;
+      background: var(--moss); border: 1px solid var(--root); border-radius: 14px;
+      padding: 10px 14px; cursor: pointer;
+      transition: border-color 0.25s ease, opacity 0.25s ease, background 0.25s ease;
+    }
+    .node span { display: block; font-size: 0.76rem; font-weight: 400; color: var(--lichen); margin-top: 2px; }
+    .roles .node { text-align: right; }
+    .node.big {
+      font-family: var(--serif); font-variation-settings: "SOFT" 100; font-size: 1.12rem; font-weight: 500;
+      text-align: center; border-radius: 999px; padding: 13px 18px;
+    }
+    .node.lit { border-color: var(--chanterelle); }
+    .node.big.lit { background: rgba(228, 155, 55, 0.14); }
+    .node.big.sel { background: var(--chanterelle); color: #22160a; }
+    .emap.dim .node:not(.lit) { opacity: 0.45; }
+    .backed { display: none; }
+
+    .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 46px; }
+    .note { border: 1px solid var(--root); border-radius: 18px; padding: 20px 22px; background: var(--moss); transition: border-color 0.25s ease; }
+    .note:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .note.lit { border-color: var(--chanterelle); }
+    .note h3 { font-family: var(--serif); font-variation-settings: "SOFT" 100; font-weight: 560; font-size: 1.15rem; margin-bottom: 6px; }
+    .note p { font-size: 0.9rem; color: var(--lichen); }
+    .note a { display: inline-block; margin-top: 10px; font-size: 0.86rem; font-weight: 500; text-decoration: none; }
+    .note a:hover { text-decoration: underline; }
+    .toolbox { margin-top: 30px; }
+    .toolbox h3 { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--lichen); font-size: 1rem; }
+
+    /* Work history along a root */
+    .roots { list-style: none; position: relative; display: grid; gap: 30px; padding-left: 34px; }
+    .roots::before { content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 1.5px; background: linear-gradient(var(--chanterelle), var(--root) 22%, var(--root) 85%, transparent); }
+    .roots > li { position: relative; }
+    .roots > li::before { content: ''; position: absolute; left: -34px; top: 8px; width: 13px; height: 13px; border-radius: 50%; background: var(--soil); border: 2px solid var(--root); }
+    .roots > li.current::before { background: var(--chanterelle); border-color: var(--chanterelle); animation: spore 2.6s ease-out infinite; }
+    @keyframes spore {
+      0% { box-shadow: 0 0 0 0 rgba(228, 155, 55, 0.5); }
+      70% { box-shadow: 0 0 0 11px rgba(228, 155, 55, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(228, 155, 55, 0); }
+    }
+    .when { font-family: var(--serif); font-style: italic; color: var(--lichen); font-size: 0.95rem; }
+    .roots h3 { font-size: 1.05rem; font-weight: 600; margin-top: 2px; }
+    .org { color: var(--chanterelle); font-size: 0.93rem; margin-bottom: 8px; }
+    .roots ul { list-style: none; display: grid; gap: 6px; }
+    .roots ul li, .roots p.more { font-size: 0.92rem; color: #c8c2b0; }
+    .roots ul li { padding-left: 16px; position: relative; }
+    .roots ul li::before { content: ''; position: absolute; left: 0; top: 0.72em; width: 5px; height: 5px; border-radius: 50%; background: var(--root); }
+    .roots p.more a { text-decoration: none; }
+    .roots p.more a:hover { text-decoration: underline; }
+    .study { margin-top: 44px; }
+    .study img { width: 100%; aspect-ratio: 21 / 9; object-fit: cover; border-radius: 22px; }
+    .study figcaption { font-size: 0.85rem; color: var(--lichen); margin-top: 10px; }
+
+    /* Research */
+    .thesis {
+      display: grid; grid-template-columns: 1.2fr 1fr; align-items: center;
+      background: var(--moss); border: 1px solid var(--root); border-radius: 24px; overflow: hidden;
+      color: inherit; text-decoration: none; margin-bottom: 30px; transition: border-color 0.25s ease;
+    }
+    .thesis:hover { border-color: var(--chanterelle); }
+    .thesis img { width: 100%; height: 100%; object-fit: cover; }
+    .thesis div { padding: 26px 28px; }
+    .thesis h3 { font-family: var(--serif); font-variation-settings: "SOFT" 100; font-weight: 560; font-size: 1.3rem; margin-bottom: 8px; }
+    .thesis p { font-size: 0.9rem; color: var(--lichen); }
+    .thesis .go { display: inline-block; margin-top: 12px; color: var(--chanterelle); font-weight: 500; font-size: 0.88rem; }
+    .pubs { list-style: none; }
+    .pubs a { display: block; padding: 18px 0; border-top: 1px solid var(--root); color: inherit; text-decoration: none; }
+    .pubs li:last-child a { border-bottom: 1px solid var(--root); }
+    .pubs h3 { font-size: 1rem; font-weight: 600; line-height: 1.5; transition: color 0.2s ease; }
+    .pubs a:hover h3 { color: var(--chanterelle); }
+    .pubs p { font-size: 0.86rem; color: var(--lichen); margin-top: 4px; }
+    .pubs .venue { font-family: var(--serif); font-style: italic; font-size: 0.95rem; color: #d6cebb; margin-top: 2px; }
+
+    /* Outdoor mosaic */
+    .mosaic { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 86px; gap: 12px; }
+    .mosaic figure { position: relative; border-radius: 20px; overflow: hidden; }
+    .mosaic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .mosaic figcaption {
+      position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 14px 10px;
+      font-family: var(--serif); font-style: italic; font-size: 0.88rem; color: var(--hypha);
+      background: linear-gradient(transparent, rgba(19, 18, 14, 0.88));
+    }
+    .m1 { grid-column: span 4; grid-row: span 4; }
+    .m2 { grid-column: span 2; grid-row: span 4; }
+    .m3 { grid-column: span 2; grid-row: span 3; }
+    .m4 { grid-column: span 2; grid-row: span 3; }
+    .m5 { grid-column: span 2; grid-row: span 3; }
+    .m6 { grid-column: span 3; grid-row: span 3; }
+    .m7 { grid-column: span 3; grid-row: span 3; }
+
+    footer { padding: 30px 0 70px; border-top: 1px solid var(--root); }
+    footer p { font-size: 0.85rem; color: var(--lichen); max-width: 62ch; }
+    footer .copy { margin-top: 14px; font-size: 0.8rem; }
+
+    .lightbox {
+      position: fixed; inset: 0; z-index: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      padding: 28px 20px; background: rgba(12, 11, 8, 0.92); backdrop-filter: blur(6px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease; cursor: zoom-out;
+    }
+    .lightbox.open { opacity: 1; pointer-events: auto; }
+    .lightbox img { max-width: min(920px, 100%); max-height: 78vh; width: auto; border-radius: 18px; }
+    .lightbox figcaption { font-family: var(--serif); font-style: italic; color: var(--lichen); text-align: center; max-width: 60ch; }
+
+    @media (max-width: 900px) {
+      .emap { grid-template-columns: 1fr; gap: 14px; }
+      .threads, .col.roles, .col.papers { display: none; }
+      .col.focus { display: flex; flex-wrap: wrap; gap: 8px; }
+      .emap-labels { display: none; }
+      .node.big { width: auto; font-size: 0.98rem; padding: 10px 16px; }
+      .emap.dim .node.big:not(.lit) { opacity: 0.8; }
+      .backed { display: block; font-size: 0.88rem; color: var(--lichen); background: var(--moss); border: 1px solid var(--root); border-radius: 16px; padding: 14px 16px; }
+      .backed b { color: var(--hypha); font-weight: 600; }
+      .notes { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .about { grid-template-columns: 1fr; gap: 30px; }
+      .blob { max-width: 320px; margin: 0 auto; }
+      .field { grid-template-columns: 1fr; }
+      .thesis { grid-template-columns: 1fr; }
+      .study img { aspect-ratio: 4 / 3; }
+      .mosaic { grid-template-columns: 1fr 1fr; grid-auto-rows: 120px; }
+      .m1, .m6, .m7 { grid-column: span 2; grid-row: span 2; }
+      .m2, .m3, .m4, .m5 { grid-column: span 1; grid-row: span 2; }
+      .minibar .name { display: none; }
+      section { padding: 60px 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .roots > li.current::before { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="minibar" id="minibar">
+    <div class="minibar-inner">
+      <a class="name" href="#top">Ori Miller</a>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#focus">Focus</a>
+        <a href="#experience">Experience</a>
+        <a href="#education">Education</a>
+        <a href="#publications">Research</a>
+        <a href="#recharge">Outside</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="hero" id="top">
+    <canvas id="net" aria-hidden="true"></canvas>
+    <canvas id="agents" aria-hidden="true"></canvas>
+    <div class="portrait"><img src="../images/web/ori-portrait.jpg" alt="Ori Miller"></div>
+    <div class="hero-text">
+      <h1>Ori Miller</h1>
+      <p class="tagline">Robotics engineer building robots that learn, see, and work alongside people. Currently an Autonomy &amp; Counter-Autonomy Researcher at Sandia National Laboratories.</p>
+      <p class="place">Albuquerque, New Mexico</p>
+      <div class="actions">
+        <a class="btn primary" href="../resume.html">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+          Résumé
+        </a>
+        <a class="btn icon" href="https://github.com/OriMiller" aria-label="GitHub" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.410-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+        <a class="btn icon" href="https://linkedin.com/in/ori-miller-du" aria-label="LinkedIn" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="about">
+      <div class="wrap">
+        <div class="about">
+          <div>
+            <h2>About</h2>
+            <p class="lead">Originally from St. Louis, Missouri. I hold an MS in Computer Science (Robotics) and a BS in Computer Science from the University of Denver, where I spent three years as a Research Assistant in the ARISE Lab under Dr. Christopher Reardon. I now work at Sandia National Laboratories as an Autonomy &amp; Counter-Autonomy Researcher, focusing on autonomous testing, physical security evaluation, and adversarial robotics.</p>
+            <div class="chips">
+              <button class="chip" data-photo="../images/web/hobby-photography.jpg" data-caption="Through the lens: a hummingbird posing at a feeder.">Photography<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+              <button class="chip" data-photo="../images/web/hobby-flyfishing.jpg" data-caption="Casting on the Merced River below El Capitan, Yosemite.">Fly fishing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+              <span class="chip">Ultimate frisbee</span>
+              <button class="chip" data-photo="../images/web/hobby-skiing.jpg" data-caption="Scoping lines on a backcountry day in the Rockies.">Skiing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+              <button class="chip" data-photo="../images/web/hobby-biking.jpg" data-caption="Fall gravel miles through the aspens.">Biking<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+              <button class="chip" data-photo="../images/web/hobby-running.jpg" data-caption="Sunset trail run in the foothills.">Running<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+              <button class="chip" data-photo="../images/web/hobby-climbing.jpg" data-caption="On belay under New Mexico skies.">Climbing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+            </div>
+          </div>
+          <figure>
+            <div class="blob"><img src="../images/web/ori-robot.jpg" alt="Ori kneeling beside an AgileX Scout Mini robot on a polished floor" loading="lazy"></div>
+            <figcaption>Hands-on with an AgileX Scout Mini</figcaption>
+          </figure>
+        </div>
+        <div class="field">
+          <figure>
+            <img src="../images/web/warthog-wipp.jpg" alt="Ori standing beside a Warthog ground robot on a desert test site" loading="lazy">
+            <figcaption>Field testing a Warthog UGV for Sandia</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/web/poster.jpg" alt="Ori presenting a research poster at the University of Denver" loading="lazy">
+            <figcaption>Presenting ground–air teaming research at DU</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="focus">
+      <div class="wide">
+        <h2>What I work on</h2>
+        <p class="intro">Hover or tap any node to see what backs it up: the roles where I did the work and the papers that document it.</p>
+        <div class="emap-labels" aria-hidden="true"><span>Where</span><span>What</span><span>Published</span></div>
+        <div class="emap" id="emap">
+          <svg class="threads" id="threads" aria-hidden="true"></svg>
+          <div class="col roles">
+            <button class="node" type="button" data-id="sandia" data-links="nav">Sandia National Laboratories<span>2024 – present</span></button>
+            <button class="node" type="button" data-id="grad" data-links="learn cv nav multi">ARISE Lab (graduate)<span>2022 – 2024</span></button>
+            <button class="node" type="button" data-id="arl" data-links="cv multi">Army Research Laboratory<span>2022 – 2023</span></button>
+            <button class="node" type="button" data-id="ugrad" data-links="cv hri">ARISE Lab (undergraduate)<span>2021 – 2022</span></button>
+          </div>
+          <div class="col focus">
+            <button class="node big" type="button" data-id="learn">Learning robot behaviors</button>
+            <button class="node big" type="button" data-id="cv">Computer vision &amp; perception</button>
+            <button class="node big" type="button" data-id="nav">Navigation</button>
+            <button class="node big" type="button" data-id="multi">Multi-robot systems</button>
+            <button class="node big" type="button" data-id="hri">Human-robot interaction</button>
+          </div>
+          <div class="col papers">
+            <a class="node" data-id="thesis" data-links="learn cv multi" href="../thesis.html">Illustrated M.S. thesis<span>Air–ground person-following, 2024</span></a>
+            <a class="node" data-id="ssrr" data-links="learn cv multi" href="../papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" target="_blank" rel="noopener">IEEE SSRR 2024<span>Person-following in constrained environments</span></a>
+            <a class="node" data-id="thri" data-links="hri" href="../papers/Augmented_Reality_Visualization_of_Auton.pdf" target="_blank" rel="noopener">ACM THRI 2023<span>AR view of robot change detection</span></a>
+            <a class="node" data-id="icramr" data-links="cv multi hri" href="../papers/Ori_ICRA_Workshop_Multi_Robot_2023.pdf" target="_blank" rel="noopener">ICRA 2023 workshop<span>Ground and micro-aerial teaming</span></a>
+            <a class="node" data-id="icranav" data-links="nav" href="../papers/Ori_ICRA_Workshop_HRT_2023.pdf" target="_blank" rel="noopener">ICRA 2023 workshop<span>Agent-aware navigation in mines</span></a>
+          </div>
+          <p class="backed" id="backed" aria-live="polite"></p>
+        </div>
+
+        <div class="notes">
+          <article class="note" data-for="learn">
+            <h3>Learning robot behaviors</h3>
+            <p>Multi-agent reinforcement learning for coordinated behavior: MADDPG policies with centralized training and decentralized execution, carried from a 2D training world into a 3D ROS autonomy stack.</p>
+            <a href="../thesis.html#marl">How the sim-to-real transfer worked</a>
+          </article>
+          <article class="note" data-for="cv">
+            <h3>Computer vision &amp; perception</h3>
+            <p>Detecting, tracking, and localizing people: LiDAR–camera fusion, camera-only range estimation, and EKF-filtered tracks that feed motion prediction.</p>
+            <a href="../thesis.html#origins">See the perception pipeline</a>
+          </article>
+          <article class="note" data-for="nav">
+            <h3>Navigation</h3>
+            <p>Autonomy where GPS doesn't reach: human-safe navigation in underground mines, SLAM and occupancy-grid planning on Clearpath ground robots, and autonomous testing with Boston Dynamics Spot.</p>
+            <a href="../papers/Ori_ICRA_Workshop_HRT_2023.pdf" target="_blank" rel="noopener">Underground navigation paper</a>
+          </article>
+          <article class="note" data-for="multi">
+            <h3>Multi-robot systems</h3>
+            <p>Heterogeneous air–ground teams: FORWARD-PF, my predictive waypoint-assignment algorithm, plus spatial tasking of micro-drones and coordinate-frame alignment across robots.</p>
+            <a href="../thesis.html">Read my thesis, illustrated</a>
+          </article>
+          <article class="note" data-for="hri">
+            <h3>Human-robot interaction</h3>
+            <p>Robots that work around and with people: augmented-reality visualization of what a robot perceives, user studies with human participants, and person-following that doesn't depend on the person cooperating.</p>
+            <a href="../papers/Augmented_Reality_Visualization_of_Auton.pdf" target="_blank" rel="noopener">ACM THRI paper</a>
+          </article>
+        </div>
+        <div class="toolbox">
+          <h3>Toolbox</h3>
+          <div class="chips">
+            <span class="chip">Python</span><span class="chip">ROS</span><span class="chip">PettingZoo / Gym</span><span class="chip">MADDPG</span><span class="chip">Unity</span><span class="chip">RViz</span><span class="chip">SLAM</span><span class="chip">Velodyne LiDAR</span><span class="chip">Intel RealSense</span><span class="chip">OptiTrack</span><span class="chip">Boston Dynamics Spot</span><span class="chip">Clearpath Jackal &amp; Warthog</span><span class="chip">Bitcraze Crazyflie</span><span class="chip">AWS</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience">
+      <div class="wrap">
+        <h2>Work history</h2>
+        <ol class="roots" reversed style="margin-top:34px">
+          <li class="current">
+            <p class="when">Aug 2024 – present</p>
+            <h3>Autonomy &amp; Counter-Autonomy Researcher</h3>
+            <p class="org">Sandia National Laboratories, Albuquerque, NM</p>
+            <ul>
+              <li>Lead autonomous testing workflows using the Boston Dynamics Spot robot to evaluate and calibrate physical security sensors.</li>
+              <li>Conduct red-team assessments of physical security systems using autonomous and semi-autonomous platforms to identify adversarial exploitation paths.</li>
+              <li>Research counter-autonomous techniques to detect, mitigate, and defend against adversarial robotic threats.</li>
+            </ul>
+          </li>
+          <li>
+            <p class="when">Mar 2022 – Aug 2024</p>
+            <h3>Graduate Research Assistant</h3>
+            <p class="org">University of Denver, ARISE Lab</p>
+            <ul>
+              <li>Master's thesis: designed FORWARD-PF, a predictive waypoint-assignment algorithm for air–ground person-following, and benchmarked it against a MADDPG multi-agent RL policy adapted from 2D training to a 3D ROS autonomy stack.</li>
+              <li>Demonstrated robotic GPS-denied human-safe navigation in sparsely featured underground mine environments.</li>
+              <li>Poster presentation at the Robot Teammates in Dynamic Unstructured Environments workshop at ICRA 2023, London.</li>
+            </ul>
+          </li>
+          <li>
+            <p class="when">Mar 2022 – Jun 2023</p>
+            <h3>Journeyman Fellow</h3>
+            <p class="org">U.S. Army DEVCOM Army Research Laboratory, Adelphi, MD</p>
+            <ul>
+              <li>Developed a heterogeneous air-ground robot system with person-following capabilities.</li>
+              <li>Presented at the Heterogeneity in Multi-Robot Systems workshop at ICRA 2023, London.</li>
+            </ul>
+          </li>
+          <li>
+            <p class="when">Jan 2021 – Mar 2022</p>
+            <h3>Undergraduate Research Assistant</h3>
+            <p class="org">University of Denver, ARISE Lab</p>
+            <ul>
+              <li>Developed person-following capabilities for a holonomic ground robot platform.</li>
+              <li>Ran HRI studies with human participants; awarded Partners in Scholarship Grant (PiNS).</li>
+            </ul>
+          </li>
+          <li>
+            <p class="when">May 2021 – Aug 2021</p>
+            <h3>Software Engineer Intern</h3>
+            <p class="org">Trimble Inc., Westminster, CO</p>
+            <ul>
+              <li>Led development of an event notification service handling 250,000 messages/day on AWS ECS, Lambda, and SQS.</li>
+              <li>Built in Python with Terraform as IaC; delivered features across agile sprints.</li>
+            </ul>
+          </li>
+          <li>
+            <p class="when">Jun 2019 – Sep 2019</p>
+            <h3>Software Development Intern</h3>
+            <p class="org">Centene Corporation, St. Louis, MO</p>
+            <ul>
+              <li>Converted monolithic code into microservices using Golang to maintain and improve database APIs.</li>
+            </ul>
+          </li>
+        </ol>
+        <figure class="study">
+          <img src="../images/web/hri-study.jpg" alt="Participant wearing an AR headset spatially tasking a Jackal robot during an HRI study" loading="lazy">
+          <figcaption>Running an HRI study in the ARISE Lab: a participant tasks a Jackal UGV through an augmented-reality headset.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="education">
+      <div class="wrap">
+        <h2>Education</h2>
+        <ol class="roots" reversed style="margin-top:34px">
+          <li>
+            <p class="when">2022 – 2024</p>
+            <h3>MS, Computer Science (Robotics)</h3>
+            <p class="org">University of Denver, Ritchie School of Engineering &amp; Computer Science</p>
+            <p class="more">Thesis: <a href="../thesis.html">Heterogeneous Multi-Robot Person-Following in Constrained Environments</a>. Advisor: Dr. Christopher Reardon.</p>
+          </li>
+          <li>
+            <p class="when">2018 – 2022</p>
+            <h3>BS, Computer Science</h3>
+            <p class="org">University of Denver</p>
+            <p class="more">Minors in Entrepreneurship Management and Mathematics.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="publications">
+      <div class="wrap">
+        <h2>Research</h2>
+        <a class="thesis" href="../thesis.html" style="margin-top:34px">
+          <img src="../images/web/thesis/fig-realworld.jpg" alt="A person, the Jackal ground robot, and the Crazyflie drone in the lab, beside the matching RViz map" loading="lazy">
+          <div>
+            <h3>My thesis, illustrated</h3>
+            <p>A plain-English, visual walkthrough of my M.S. thesis: two robots, one person to follow, and a hand-built forecaster versus multi-agent RL, from sim-to-real transfer to hardware.</p>
+            <span class="go">Read the walkthrough</span>
+          </div>
+        </a>
+        <ul class="pubs">
+          <li><a href="../papers/Ori_Miller_MS_Thesis_2024.pdf" target="_blank" rel="noopener">
+            <h3>Heterogeneous Multi-Robot Person-Following in Constrained Environments (M.S. Thesis)</h3>
+            <p>Ori A. Miller. Advisor: Dr. Christopher Reardon</p>
+            <p class="venue">University of Denver, August 2024</p>
+          </a></li>
+          <li><a href="../papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" target="_blank" rel="noopener">
+            <h3>Heterogeneous Multi-Robot Person-Following in Constrained Environments</h3>
+            <p>Ori A. Miller, Jason M. Gregory, Christopher Reardon</p>
+            <p class="venue">IEEE SSRR, November 2024</p>
+          </a></li>
+          <li><a href="../papers/Augmented_Reality_Visualization_of_Auton.pdf" target="_blank" rel="noopener">
+            <h3>Augmented Reality Visualization of Autonomous Mobile Robot Change Detection in Uninstrumented Environments</h3>
+            <p>Christopher Reardon, Jason M. Gregory, Kerstin S. Haring, Benjamin Dossett, Ori A. Miller, Aniekan Inyang</p>
+            <p class="venue">ACM Transactions on Human-Robot Interaction (THRI), 2023</p>
+          </a></li>
+          <li><a href="../papers/Ori_ICRA_Workshop_Multi_Robot_2023.pdf" target="_blank" rel="noopener">
+            <h3>Teaming Heterogeneous Ground and Micro-Aerial Robots for Following of Non-Cooperative Agents</h3>
+            <p>Ori A. Miller, Christopher Reardon, Jason M. Gregory</p>
+            <p class="venue">Heterogeneity in Multi-Robot Systems Workshop, ICRA, London, May 2023</p>
+          </a></li>
+          <li><a href="../papers/Ori_ICRA_Workshop_HRT_2023.pdf" target="_blank" rel="noopener">
+            <h3>Autonomous Agent-aware Navigation in Underground Mine Environments</h3>
+            <p>Ori A. Miller, Christopher Reardon</p>
+            <p class="venue">Heterogeneous Multi-Robot Cooperation in Extreme Environments Workshop, ICRA, London, May 2023</p>
+          </a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="recharge">
+      <div class="wide">
+        <h2>Where I recharge</h2>
+        <p class="intro">Fall in the Rockies, red rock in Utah, and trout water in the Sierra.</p>
+        <div class="mosaic">
+          <figure class="m1"><img src="../images/web/outdoors/rollins-pass-fog.jpg" alt="Two hikers on a trail through golden tundra grass in fog" loading="lazy"><figcaption>October fog on Rollins Pass, Colorado</figcaption></figure>
+          <figure class="m2"><img src="../images/web/outdoors/bryce-wall-street.jpg" alt="Hikers on switchbacks between orange hoodoo walls" loading="lazy" style="object-position: 40% 50%"><figcaption>Wall Street, Bryce Canyon</figcaption></figure>
+          <figure class="m3"><img src="../images/web/outdoors/sierra-camp-coffee.jpg" alt="A hooded hiker holding a mug beside an alpine lake ringed by pines" loading="lazy" style="object-position: 70% 50%"><figcaption>Camp coffee in the Sierra</figcaption></figure>
+          <figure class="m4"><img src="../images/web/outdoors/utah-pink-cliffs.jpg" alt="Pink limestone cliffs behind tall spruce at dusk" loading="lazy"><figcaption>Pink cliffs at dusk, southern Utah</figcaption></figure>
+          <figure class="m5"><img src="../images/web/outdoors/capitol-reef-sulphur-creek.jpg" alt="A small waterfall pouring into a pool between sandstone ledges" loading="lazy"><figcaption>Sulphur Creek, Capitol Reef</figcaption></figure>
+          <figure class="m6"><img src="../images/web/outdoors/owens-river.jpg" alt="A meandering creek through green meadow below brown mountains" loading="lazy"><figcaption>Trout water in Long Valley, Eastern Sierra</figcaption></figure>
+          <figure class="m7"><img src="../images/web/outdoors/half-dome-alpenglow.jpg" alt="Half Dome glowing orange at sunset above dark pines" loading="lazy" style="object-position: 50% 35%"><figcaption>Last light on Half Dome</figcaption></figure>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>Hand-written HTML with no trackers or frameworks. The network at the top is drawn in your browser, grows once, and then stops, so it isn't spending your battery while you read.</p>
+      <p class="copy">&copy; 2026 Ori Miller</p>
+    </div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <img alt="">
+    <figcaption></figcaption>
+  </div>
+
+  <script>
+    /* ---------- Hero: hyphae grow from the portrait to people and robots ---------- */
+    (() => {
+      const hero = document.querySelector('.hero');
+      const canvas = document.getElementById('net');
+      const ctx = canvas.getContext('2d');
+      const layer = document.getElementById('agents');
+      const nctx = layer.getContext('2d');
+      const portrait = document.querySelector('.portrait');
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let raf, lastW = 0;
+
+      function mulberry(a) {
+        return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+      }
+
+      const icons = {
+        person(c) { c.beginPath(); c.arc(0, -4.5, 3, 0, Math.PI * 2); c.moveTo(-6.5, 7); c.quadraticCurveTo(0, -3, 6.5, 7); c.stroke(); },
+        ugv(c) { c.strokeRect(-7.5, -3, 15, 6); c.beginPath(); c.arc(-4.5, 4.5, 2.4, 0, Math.PI * 2); c.moveTo(6.9, 4.5); c.arc(4.5, 4.5, 2.4, 0, Math.PI * 2); c.moveTo(0, -3); c.lineTo(0, -7); c.moveTo(2, -8); c.arc(0, -8, 2, 0, Math.PI * 2); c.stroke(); },
+        drone(c) { c.beginPath(); c.moveTo(-5, -5); c.lineTo(5, 5); c.moveTo(-5, 5); c.lineTo(5, -5); for (const [x, y] of [[-6, -6], [6, -6], [-6, 6], [6, 6]]) { c.moveTo(x + 2.6, y); c.arc(x, y, 2.6, 0, Math.PI * 2); } c.stroke(); },
+        quad(c) { c.strokeRect(-7, -4, 12, 5); c.beginPath(); c.moveTo(5, -3); c.lineTo(8.5, -4.5); c.moveTo(-5, 1); c.lineTo(-3, 4.5); c.lineTo(-5.5, 8); c.moveTo(3, 1); c.lineTo(5, 4.5); c.lineTo(2.5, 8); c.stroke(); }
+      };
+
+      function grow() {
+        cancelAnimationFrame(raf);
+        const W = hero.clientWidth, H = hero.clientHeight;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        for (const c of [canvas, layer]) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        nctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, W, H);
+        lastW = W;
+
+        const hr = hero.getBoundingClientRect(), pr = portrait.getBoundingClientRect();
+        const cx = pr.left - hr.left + pr.width / 2, cy = pr.top - hr.top + pr.height / 2, R = pr.width / 2;
+        const rand = mulberry(20261004);
+        const narrow = W < 720;
+
+        // People and robots placed around the portrait, clear of the text below it
+        const kinds = ['person', 'ugv', 'person', 'drone', 'quad', 'person', 'ugv', 'person', 'drone', 'person'];
+        const angles = narrow ? [-160, -125, -90, -55, -20, 200] : [-200, -172, -145, -118, -90, -62, -35, -8, 20, 160];
+        const nodes = angles.map((deg, i) => {
+          const a = deg * Math.PI / 180;
+          const rx = narrow ? R * (1.75 + (i % 2) * 0.35) : R * (2.2 + (i % 3) * 0.55);
+          const ry = narrow ? R * (1.35 + (i % 2) * 0.3) : R * (1.25 + (i % 3) * 0.3);
+          return {
+            x: Math.max(26, Math.min(W - 26, cx + Math.cos(a) * rx * (narrow ? 1 : 1.25))),
+            y: Math.max(26, Math.min(H - 26, cy + Math.sin(a) * ry)),
+            kind: kinds[i % kinds.length], lit: 0
+          };
+        });
+
+        const tips = [];
+        nodes.forEach(n => {
+          const a = Math.atan2(n.y - cy, n.x - cx) + (rand() - 0.5) * 0.5;
+          tips.push({ x: cx + Math.cos(a) * (R + 4), y: cy + Math.sin(a) * (R + 4), a, w: 2.1, gen: 0, target: n, len: 0, life: 2000 });
+        });
+        for (let k = 0; k < 9; k++) {
+          const a = rand() * Math.PI * 2;
+          tips.push({ x: cx + Math.cos(a) * (R + 4), y: cy + Math.sin(a) * (R + 4), a, w: 1.5, gen: 1, target: null, len: 0, life: 120 + rand() * 220 });
+        }
+
+        const STEP = 2.6;
+        function advance(t) {
+          const ox = t.x, oy = t.y;
+          if (t.target) {
+            const want = Math.atan2(t.target.y - t.y, t.target.x - t.x);
+            let d = want - t.a; d = Math.atan2(Math.sin(d), Math.cos(d));
+            t.a += d * 0.07;
+          }
+          t.a += (rand() - 0.5) * 0.42;
+          t.x += Math.cos(t.a) * STEP; t.y += Math.sin(t.a) * STEP; t.len += STEP;
+          ctx.strokeStyle = t.target ? 'rgba(236, 227, 208, 0.5)' : 'rgba(236, 227, 208, 0.26)';
+          ctx.lineWidth = t.w; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(t.x, t.y); ctx.stroke();
+          t.w = Math.max(0.45, t.w * 0.997);
+          if (t.gen < 4 && rand() < 0.018) {
+            const side = rand() < 0.5 ? -1 : 1;
+            tips.push({ x: t.x, y: t.y, a: t.a + side * (0.5 + rand() * 0.6), w: t.w * 0.62, gen: t.gen + 1, target: null, len: 0, life: 40 + rand() * 150 });
+          }
+          if (t.target && Math.hypot(t.target.x - t.x, t.target.y - t.y) < 15) { t.done = true; t.target.lit = 1; }
+          if (!t.target && t.len > t.life) t.done = true;
+          if (t.x < -10 || t.y < -10 || t.x > W + 10 || t.y > H + 10 || t.len > t.life) t.done = true;
+        }
+
+        // Agents live on their own layer, redrawn each frame so glows don't pile up
+        function drawNodes() {
+          nctx.clearRect(0, 0, W, H);
+          for (const n of nodes) {
+            nctx.save(); nctx.translate(n.x, n.y);
+            nctx.fillStyle = '#13120e';
+            nctx.strokeStyle = n.lit ? '#e49b37' : 'rgba(236, 227, 208, 0.35)';
+            nctx.lineWidth = n.lit ? 1.6 : 1.2;
+            if (n.lit) { nctx.shadowColor = 'rgba(228, 155, 55, 0.55)'; nctx.shadowBlur = 12; }
+            nctx.beginPath(); nctx.arc(0, 0, 16, 0, Math.PI * 2); nctx.fill(); nctx.stroke();
+            nctx.shadowBlur = 0;
+            nctx.strokeStyle = n.lit ? '#ece3d0' : 'rgba(236, 227, 208, 0.45)';
+            nctx.lineWidth = 1.2; nctx.lineJoin = 'round';
+            icons[n.kind](nctx);
+            nctx.restore();
+          }
+        }
+
+        let frames = 0;
+        function tick() {
+          for (let s = 0; s < 3; s++) {
+            const live = tips.filter(t => !t.done);
+            live.forEach(advance);
+          }
+          drawNodes();
+          frames++;
+          if (tips.some(t => !t.done) && frames < 420) raf = requestAnimationFrame(tick);
+        }
+        if (reduce) {
+          let guard = 0;
+          while (tips.some(t => !t.done) && guard++ < 1400) tips.filter(t => !t.done).forEach(advance);
+          drawNodes();
+        } else {
+          raf = requestAnimationFrame(tick);
+        }
+      }
+
+      const img = portrait.querySelector('img');
+      const start = () => grow();
+      if (img.complete) start(); else img.addEventListener('load', start, { once: true });
+      let timer;
+      window.addEventListener('resize', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { if (Math.abs(hero.clientWidth - lastW) > 2) grow(); }, 200);
+      });
+    })();
+
+    /* ---------- Evidence map ---------- */
+    (() => {
+      const map = document.getElementById('emap');
+      const svg = document.getElementById('threads');
+      const backed = document.getElementById('backed');
+      const nodes = [...map.querySelectorAll('.node')];
+      const byId = Object.fromEntries(nodes.map(n => [n.dataset.id, n]));
+      const notes = [...document.querySelectorAll('.note')];
+      const edges = [];
+      nodes.forEach(n => (n.dataset.links || '').split(' ').filter(Boolean).forEach(f => edges.push([n.dataset.id, f])));
+      let selected = 'multi';
+
+      function draw() {
+        svg.innerHTML = '';
+        const box = map.getBoundingClientRect();
+        svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+        for (const [a, f] of edges) {
+          const n = byId[a].getBoundingClientRect(), t = byId[f].getBoundingClientRect();
+          const fromRole = byId[a].closest('.roles');
+          const x1 = (fromRole ? n.right : n.left) - box.left, y1 = n.top + n.height / 2 - box.top;
+          const x2 = (fromRole ? t.left : t.right) - box.left, y2 = t.top + t.height / 2 - box.top;
+          const mx = (x1 + x2) / 2;
+          const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          p.setAttribute('d', `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`);
+          p.dataset.a = a; p.dataset.f = f;
+          svg.appendChild(p);
+        }
+        light(selected);
+      }
+
+      function neighbors(id) {
+        const out = new Set([id]);
+        for (const [a, f] of edges) { if (a === id) out.add(f); if (f === id) out.add(a); }
+        return out;
+      }
+
+      function light(id) {
+        const on = neighbors(id);
+        map.classList.add('dim');
+        nodes.forEach(n => {
+          n.classList.toggle('lit', on.has(n.dataset.id));
+          n.classList.toggle('sel', n.dataset.id === selected);
+        });
+        svg.querySelectorAll('path').forEach(p => p.classList.toggle('lit', p.dataset.a === id || p.dataset.f === id));
+        notes.forEach(n => n.classList.toggle('lit', on.has(n.dataset.for)));
+        const focus = byId[id].classList.contains('big') ? id : selected;
+        const linked = [...neighbors(focus)].filter(x => x !== focus).map(x => byId[x]);
+        const where = linked.filter(n => n.closest('.roles')).map(n => n.firstChild.textContent.trim());
+        const papers = linked.filter(n => n.closest('.papers')).map(n => n.firstChild.textContent.trim());
+        const list = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
+        backed.innerHTML = `<b>${byId[focus].textContent}</b>: done at ${list.format(where)}; written up in ${list.format(papers)}.`;
+      }
+
+      nodes.forEach(n => {
+        n.addEventListener('mouseenter', () => light(n.dataset.id));
+        n.addEventListener('focus', () => light(n.dataset.id));
+        n.addEventListener('mouseleave', () => light(selected));
+        n.addEventListener('blur', () => light(selected));
+        if (n.classList.contains('big')) n.addEventListener('click', () => { selected = n.dataset.id; light(selected); });
+      });
+
+      draw();
+      if (document.fonts) document.fonts.ready.then(draw);
+      let timer;
+      window.addEventListener('resize', () => { clearTimeout(timer); timer = setTimeout(draw, 120); });
+    })();
+
+    /* ---------- Minibar and lightbox ---------- */
+    (() => {
+      const minibar = document.getElementById('minibar');
+      const hero = document.querySelector('.hero');
+      window.addEventListener('scroll', () => minibar.classList.toggle('show', window.scrollY > hero.offsetHeight * 0.85), { passive: true });
+      const lightbox = document.getElementById('lightbox');
+      const lbImg = lightbox.querySelector('img');
+      const lbCap = lightbox.querySelector('figcaption');
+      document.querySelectorAll('button[data-photo]').forEach(btn => btn.addEventListener('click', () => {
+        lbImg.src = btn.dataset.photo; lbImg.alt = btn.dataset.caption; lbCap.textContent = btn.dataset.caption;
+        lightbox.classList.add('open');
+      }));
+      lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.classList.remove('open'); });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ori Miller — Robotics Researcher</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='4' fill='%231c2a21'/%3E%3Cpath d='M7 6h10M7 18h10' stroke='%23d4ad5a' stroke-width='1.4'/%3E%3Ctext x='12' y='15.5' font-family='Georgia' font-size='9' font-weight='700' fill='%23d4ad5a' text-anchor='middle'%3EOM%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;0,800;1,400;1,500&family=Alegreya+SC:wght@500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* A cloth-bound field guide: green bookcloth, gold foil stamping,
+       cream plate stock, iron-gall ink, and blaze orange for field labels. */
+    :root {
+      --cloth: #1c2a21;
+      --cloth-deep: #152019;
+      --foil: #d4ad5a;
+      --foil-hi: #ecd08e;
+      --plate: #efe6d2;
+      --plate-edge: #d9cdb2;
+      --ink: #2a241c;
+      --ink-soft: #5c5244;
+      --blaze: #a83d14;
+      --blaze-bright: #e0601f;
+      --on-cloth: #e8e2cc;
+      --on-cloth-muted: #a9b29d;
+      --serif: 'Alegreya', Georgia, serif;
+      --sans: 'Alegreya Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--serif);
+      font-size: 1.0625rem;
+      color: var(--on-cloth);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      background-color: var(--cloth);
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.016) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0 1px, transparent 1px 3px);
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: var(--foil-hi); text-underline-offset: 3px; }
+    :focus-visible { outline: 2px solid var(--foil-hi); outline-offset: 3px; border-radius: 3px; }
+
+    .minibar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 250;
+      background: rgba(21, 32, 25, 0.92); backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(212, 173, 90, 0.35);
+      transform: translateY(-100%); transition: transform 0.3s ease;
+    }
+    .minibar.show { transform: translateY(0); }
+    .minibar-inner { max-width: 1060px; margin: 0 auto; padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    .minibar .name { font-weight: 700; color: var(--foil); text-decoration: none; white-space: nowrap; }
+    .minibar nav { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; }
+    .minibar nav::-webkit-scrollbar { display: none; }
+    .minibar nav a { font-family: var(--sans); font-size: 0.9rem; color: var(--on-cloth-muted); text-decoration: none; white-space: nowrap; }
+    .minibar nav a:hover { color: var(--foil-hi); }
+
+    /* Cover */
+    .cover { min-height: 100svh; padding: 22px; display: flex; }
+    .frame {
+      position: relative; flex: 1;
+      border: 2px solid rgba(212, 173, 90, 0.75);
+      outline: 1px solid rgba(212, 173, 90, 0.45); outline-offset: -9px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 64px 48px;
+      background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.03), transparent 70%);
+    }
+    .cover-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 64px; align-items: center; max-width: 1000px; width: 100%; }
+    .foil {
+      background: linear-gradient(170deg, #f2dca0 0%, #d4ad5a 38%, #a9832f 62%, #e2c27a 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.45));
+    }
+    .kicker { font-family: 'Alegreya SC', var(--serif); font-weight: 500; font-size: 1.35rem; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .cover h1 { font-size: clamp(3.4rem, 8vw, 6.4rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.01em; }
+    .subtitle { font-style: italic; font-size: 1.45rem; color: var(--foil-hi); margin: 10px 0 30px; }
+    .rule { width: 72px; height: 1px; background: var(--foil); margin-bottom: 26px; opacity: 0.8; }
+    .tagline { font-size: 1.15rem; max-width: 40ch; color: var(--on-cloth); }
+    .place { font-family: var(--sans); color: var(--on-cloth-muted); margin: 10px 0 30px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      height: 44px; padding: 0 18px; border-radius: 3px;
+      border: 1px solid rgba(212, 173, 90, 0.6); color: var(--foil-hi); background: transparent;
+      font-family: var(--sans); font-weight: 500; font-size: 0.95rem; text-decoration: none;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .btn:hover { background: rgba(212, 173, 90, 0.12); }
+    .btn.primary { background: var(--foil); border-color: var(--foil); color: #1d1a10; font-weight: 700; }
+    .btn.primary:hover { background: var(--foil-hi); }
+    .btn.icon { width: 44px; padding: 0; }
+    .btn svg { width: 18px; height: 18px; }
+    .cameo {
+      justify-self: center; width: min(320px, 100%); aspect-ratio: 4 / 5;
+      border-radius: 50%; padding: 7px;
+      border: 2px solid var(--foil);
+      box-shadow: inset 0 0 0 1px rgba(212, 173, 90, 0.5), 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+    .cameo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .cameo-cap { text-align: center; font-style: italic; color: var(--on-cloth-muted); font-size: 0.95rem; margin-top: 12px; }
+
+    .page { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+    .measure { max-width: 720px; }
+    section { padding: 88px 0 24px; }
+    section h2 { font-size: clamp(2rem, 4vw, 2.6rem); font-weight: 700; color: var(--foil); line-height: 1.1; margin-bottom: 10px; }
+    .lede { font-style: italic; color: var(--on-cloth-muted); font-size: 1.1rem; max-width: 60ch; margin-bottom: 34px; }
+
+    /* About */
+    .about-text { font-size: 1.12rem; line-height: 1.75; max-width: 64ch; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 5px 13px; border-radius: 3px;
+      font: 500 0.88rem/1.4 var(--sans); color: var(--on-cloth);
+      background: rgba(21, 32, 25, 0.6); border: 1px solid rgba(212, 173, 90, 0.35);
+    }
+    button.chip { cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+    button.chip:hover { border-color: var(--foil); color: var(--foil-hi); }
+    button.chip svg { width: 12px; height: 12px; opacity: 0.7; }
+    .figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 40px; }
+    .mat { background: var(--plate); padding: 10px 10px 12px; border-radius: 2px; box-shadow: 0 1px 0 var(--plate-edge), 0 14px 30px rgba(0, 0, 0, 0.3); }
+    .mat img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+    .mat figcaption { font-style: italic; color: var(--ink); font-size: 0.92rem; line-height: 1.4; margin-top: 8px; }
+    .mat figcaption b { font-style: normal; font-family: var(--sans); font-weight: 700; color: var(--blaze); margin-right: 4px; }
+
+    /* Specimen plates */
+    .plates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .specimen {
+      background: var(--plate); color: var(--ink); border-radius: 2px;
+      padding: 16px 18px 20px;
+      box-shadow: 0 1px 0 var(--plate-edge), 0 16px 34px rgba(0, 0, 0, 0.3);
+    }
+    .specimen .drawing {
+      display: block; width: 100%; height: auto; color: var(--ink);
+      border: 1px solid rgba(42, 36, 28, 0.25); outline: 1px solid rgba(42, 36, 28, 0.12); outline-offset: 3px;
+      background: radial-gradient(ellipse at 50% 60%, #f6efdf, var(--plate));
+      margin-bottom: 16px;
+    }
+    .specimen h3 { font-size: 1.22rem; font-weight: 700; line-height: 1.2; }
+    .binomial { font-style: italic; color: var(--ink-soft); margin-bottom: 12px; }
+    .specimen dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 0.95rem; line-height: 1.45; }
+    .specimen dt { font-family: var(--sans); font-weight: 700; font-size: 0.82rem; color: var(--blaze); padding-top: 2px; }
+    .specimen dd { color: var(--ink); }
+    .specimen.honorable { background: #e9e2cd; }
+    .specimen.honorable .tag { display: inline-block; font-family: var(--sans); font-size: 0.78rem; font-weight: 700; color: var(--blaze); margin-bottom: 4px; }
+
+    /* Focus areas */
+    .focus { display: grid; grid-template-columns: 1fr 1fr; gap: 0 44px; }
+    .focus article { padding: 22px 0; border-top: 1px solid rgba(212, 173, 90, 0.3); }
+    .focus article:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .focus h3 { font-size: 1.3rem; font-weight: 700; color: var(--foil-hi); margin-bottom: 6px; }
+    .focus p { color: var(--on-cloth); font-size: 1.02rem; }
+    .focus a { display: inline-block; margin-top: 8px; font-family: var(--sans); font-weight: 500; font-size: 0.95rem; }
+    .toolbox { margin-top: 26px; }
+    .toolbox h3 { font-style: italic; font-weight: 400; color: var(--on-cloth-muted); font-size: 1.05rem; }
+
+    /* Work history */
+    .history { list-style: none; display: grid; gap: 0; }
+    .history > li { display: grid; grid-template-columns: 170px 1fr; gap: 28px; padding: 24px 0; border-top: 1px solid rgba(212, 173, 90, 0.25); }
+    .when { font-style: italic; color: var(--on-cloth-muted); }
+    .history li.current .when { color: var(--foil-hi); }
+    .history li.current .when::before {
+      content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--foil-hi);
+      margin-right: 8px; vertical-align: middle; animation: glint 2.4s ease-out infinite;
+    }
+    @keyframes glint {
+      0% { box-shadow: 0 0 0 0 rgba(236, 208, 142, 0.5); }
+      70% { box-shadow: 0 0 0 8px rgba(236, 208, 142, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(236, 208, 142, 0); }
+    }
+    .history h3 { font-size: 1.18rem; font-weight: 700; line-height: 1.3; }
+    .org { font-family: var(--sans); color: var(--foil); margin-bottom: 8px; }
+    .history ul { list-style: none; display: grid; gap: 6px; }
+    .history ul li, .history p.more { font-size: 1rem; color: var(--on-cloth); }
+    .history ul li { padding-left: 18px; position: relative; }
+    .history ul li::before { content: ''; position: absolute; left: 2px; top: 0.7em; width: 6px; height: 6px; transform: rotate(45deg); border: 1px solid var(--foil); }
+    .plate-photo { margin-top: 34px; }
+    .plate-photo img { aspect-ratio: 21 / 9; }
+
+    /* Range map */
+    .range-wrap { display: grid; grid-template-columns: 1.5fr 1fr; gap: 34px; align-items: center; }
+    .map-plate { background: var(--plate); padding: 14px; border-radius: 2px; box-shadow: 0 1px 0 var(--plate-edge), 0 16px 34px rgba(0, 0, 0, 0.3); }
+    .range-map { display: block; width: 100%; height: auto; overflow: visible; }
+    .range-map .range { fill: rgba(224, 96, 31, 0.13); stroke: rgba(168, 61, 20, 0.45); stroke-width: 0.5; stroke-dasharray: 1.6 1.2; }
+    .range-map .states { fill: none; stroke: rgba(42, 36, 28, 0.55); stroke-width: 0.35; stroke-linejoin: round; }
+    .range-map .pt { cursor: pointer; outline: none; }
+    .range-map .hit { fill: transparent; }
+    .range-map .dot { fill: var(--blaze-bright); stroke: var(--plate); stroke-width: 0.6; transition: r 0.15s ease; }
+    .range-map .star { fill: var(--ink); stroke: var(--plate); stroke-width: 0.5; }
+    .range-map text {
+      font-family: var(--sans); font-size: 4.4px; font-weight: 700; fill: var(--ink);
+      paint-order: stroke; stroke: var(--plate); stroke-width: 1.4px;
+      opacity: 0; transition: opacity 0.15s ease; pointer-events: none;
+    }
+    .range-map .pt:hover text, .range-map .pt:focus text, .range-map .home text { opacity: 1; }
+    .range-map .pt:hover .dot, .range-map .pt:focus .dot { r: 3.3; }
+    .range-map .pt:focus-visible .hit { stroke: var(--blaze); stroke-width: 0.6; }
+    .legend { list-style: none; display: grid; gap: 12px; font-size: 1rem; }
+    .legend li { display: grid; grid-template-columns: 30px 1fr; align-items: center; gap: 10px; }
+    .legend svg { width: 26px; height: 18px; }
+    .legend p { color: var(--on-cloth-muted); font-style: italic; }
+
+    /* Publications */
+    .thesis {
+      display: grid; grid-template-columns: 1fr 1.1fr; gap: 0; align-items: stretch;
+      background: var(--plate); color: var(--ink); text-decoration: none; border-radius: 2px;
+      box-shadow: 0 1px 0 var(--plate-edge), 0 16px 34px rgba(0, 0, 0, 0.3); margin-bottom: 30px; overflow: hidden;
+    }
+    .thesis img { width: 100%; height: 100%; object-fit: cover; }
+    .thesis div { padding: 24px 26px; }
+    .thesis h3 { font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; }
+    .thesis p { color: var(--ink-soft); }
+    .thesis .go { display: inline-block; margin-top: 12px; font-family: var(--sans); font-weight: 700; color: var(--blaze); }
+    .thesis:hover .go { text-decoration: underline; }
+    .pubs { list-style: none; }
+    .pubs a { display: block; padding: 18px 0; border-top: 1px solid rgba(212, 173, 90, 0.25); color: inherit; text-decoration: none; }
+    .pubs h3 { font-size: 1.12rem; font-weight: 700; line-height: 1.4; transition: color 0.2s ease; }
+    .pubs a:hover h3 { color: var(--foil-hi); }
+    .pubs .authors { font-family: var(--sans); font-size: 0.95rem; color: var(--on-cloth-muted); margin-top: 2px; }
+    .pubs .venue { font-style: italic; color: var(--foil); }
+
+    footer { margin-top: 80px; padding: 40px 0 70px; border-top: 1px solid rgba(212, 173, 90, 0.35); }
+    .colophon { max-width: 64ch; font-size: 0.98rem; color: var(--on-cloth-muted); }
+    .colophon b { font-weight: 700; color: var(--foil); }
+    .copy { font-family: var(--sans); font-size: 0.85rem; color: var(--on-cloth-muted); margin-top: 14px; }
+
+    .lightbox {
+      position: fixed; inset: 0; z-index: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      padding: 28px 20px; background: rgba(13, 20, 16, 0.94); backdrop-filter: blur(6px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease; cursor: zoom-out;
+    }
+    .lightbox.open { opacity: 1; pointer-events: auto; }
+    .lightbox .mat { max-width: min(900px, 100%); }
+    .lightbox img { max-height: 74vh; width: auto; aspect-ratio: auto; }
+
+    @media (max-width: 900px) {
+      .plates { grid-template-columns: 1fr 1fr; }
+      .range-wrap { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .cover { padding: 12px; }
+      .frame { padding: 48px 22px 40px; }
+      .cover-grid { grid-template-columns: 1fr; gap: 34px; }
+      .cover-grid > figure { order: -1; }
+      .cameo { width: 168px; }
+      .figs, .plates, .focus { grid-template-columns: 1fr; }
+      .mat img { aspect-ratio: 4 / 3; }
+      .history > li { grid-template-columns: 1fr; gap: 4px; }
+      .thesis { grid-template-columns: 1fr; }
+      .plate-photo img { aspect-ratio: 4 / 3; }
+      .minibar .name { display: none; }
+      section { padding-top: 64px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .history li.current .when::before { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="minibar" id="minibar">
+    <div class="minibar-inner">
+      <a class="name" href="#top">Ori Miller</a>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#robots">Robots</a>
+        <a href="#focus">Focus</a>
+        <a href="#experience">Experience</a>
+        <a href="#range">Range</a>
+        <a href="#publications">Research</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="cover" id="top">
+    <div class="frame">
+      <div class="cover-grid">
+        <div>
+          <p class="kicker foil">A field guide to</p>
+          <h1 class="foil">Ori Miller</h1>
+          <p class="subtitle">and the robots I work with</p>
+          <div class="rule"></div>
+          <p class="tagline">Robotics engineer building robots that learn, see, and work alongside people. Currently an Autonomy &amp; Counter-Autonomy Researcher at Sandia National Laboratories.</p>
+          <p class="place">Albuquerque, New Mexico</p>
+          <div class="actions">
+            <a class="btn primary" href="../resume.html">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+              Résumé
+            </a>
+            <a class="btn icon" href="https://github.com/OriMiller" aria-label="GitHub" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+            <a class="btn icon" href="https://linkedin.com/in/ori-miller-du" aria-label="LinkedIn" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+          </div>
+        </div>
+        <figure>
+          <div class="cameo"><img src="../images/web/ori-portrait.jpg" alt="Ori Miller"></div>
+        </figure>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section id="about" class="measure" style="max-width:none">
+      <h2>About</h2>
+      <p class="about-text">Originally from St. Louis, Missouri. I hold an MS in Computer Science (Robotics) and a BS in Computer Science from the University of Denver, where I spent three years as a Research Assistant in the ARISE Lab under Dr. Christopher Reardon. I now work at Sandia National Laboratories as an Autonomy &amp; Counter-Autonomy Researcher, focusing on autonomous testing, physical security evaluation, and adversarial robotics.</p>
+      <div class="chips">
+        <button class="chip" data-photo="../images/web/hobby-photography.jpg" data-caption="Through the lens: a hummingbird posing at a feeder.">Photography<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+        <button class="chip" data-photo="../images/web/hobby-flyfishing.jpg" data-caption="Casting on the Merced River below El Capitan, Yosemite.">Fly fishing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+        <span class="chip">Ultimate frisbee</span>
+        <button class="chip" data-photo="../images/web/hobby-skiing.jpg" data-caption="Scoping lines on a backcountry day in the Rockies.">Skiing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+        <button class="chip" data-photo="../images/web/hobby-biking.jpg" data-caption="Fall gravel miles through the aspens.">Biking<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+        <button class="chip" data-photo="../images/web/hobby-running.jpg" data-caption="Sunset trail run in the foothills.">Running<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+        <button class="chip" data-photo="../images/web/hobby-climbing.jpg" data-caption="On belay under New Mexico skies.">Climbing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="13" r="4"/><path d="M4 7h3l2-3h6l2 3h3v12H4z" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div class="figs">
+        <figure class="mat">
+          <img src="../images/web/ori-robot.jpg" alt="Ori kneeling beside an AgileX Scout Mini robot on a polished floor" loading="lazy" style="object-position: 50% 42%">
+          <figcaption><b>Fig. 1</b>Hands-on with an AgileX Scout Mini.</figcaption>
+        </figure>
+        <figure class="mat">
+          <img src="../images/web/warthog-wipp.jpg" alt="Ori standing beside a Warthog ground robot on a desert test site" loading="lazy">
+          <figcaption><b>Fig. 2</b>Field testing a Warthog UGV for Sandia.</figcaption>
+        </figure>
+        <figure class="mat">
+          <img src="../images/web/poster.jpg" alt="Ori presenting a research poster at the University of Denver" loading="lazy">
+          <figcaption><b>Fig. 3</b>Presenting ground–air teaming research at DU.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="robots">
+      <h2>Robots I've worked with</h2>
+      <p class="lede">Each plate notes where I worked with the robot and what I had it do.</p>
+      <div class="plates">
+
+        <article class="specimen">
+          <svg class="drawing" viewBox="0 0 240 150" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 132h200" stroke-width="1" opacity=".45"/>
+            <g opacity=".4"><path d="M90 86l-11 22 13 24"/><path d="M162 86l-11 22 13 24"/></g>
+            <path d="M62 60h108l14 8v14l-10 6H70l-10-6V64z"/>
+            <path d="M184 68l12 3v9l-12 3"/><circle cx="191" cy="75" r="1.4"/>
+            <path d="M86 60v-4h66v4"/>
+            <path d="M74 72h96" stroke-width="1" opacity=".55"/>
+            <circle cx="78" cy="86" r="5"/><path d="M76 91l-11 18 14 23"/><circle cx="65" cy="109" r="3"/>
+            <circle cx="150" cy="86" r="5"/><path d="M148 91l-11 18 14 23"/><circle cx="137" cy="109" r="3"/>
+            <path d="M76 132h8M148 132h8" stroke-width="2.6"/>
+          </g></svg>
+          <h3>Boston Dynamics Spot</h3>
+          <p class="binomial">Quadrupes vigilans</p>
+          <dl>
+            <dt>Habitat</dt><dd>Sandia National Laboratories</dd>
+            <dt>Behavior</dt><dd>Runs the autonomous testing workflows I lead to evaluate and calibrate physical security sensors.</dd>
+            <dt>Field marks</dt><dd>Four legs; walks stairs and rough ground that stop wheeled robots.</dd>
+          </dl>
+        </article>
+
+        <article class="specimen">
+          <svg class="drawing" viewBox="0 0 240 150" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 132h200" stroke-width="1" opacity=".45"/>
+            <path d="M44 66h150l10 12v18l-8 8H50l-10-10V74z"/>
+            <path d="M60 66V54h116v12"/><path d="M60 59h116" stroke-width="1" opacity=".55"/>
+            <path d="M150 54V32"/><rect x="140" y="22" width="20" height="10" rx="2"/><path d="M140 27h20" stroke-width="1"/>
+            <path d="M84 54V38"/><circle cx="84" cy="35" r="2.4"/>
+            <circle cx="74" cy="108" r="24"/><circle cx="74" cy="108" r="8"/>
+            <circle cx="166" cy="108" r="24"/><circle cx="166" cy="108" r="8"/>
+            <path d="M93.0 108.0L98.0 108.0M91.6 115.3L96.2 117.2M87.4 121.4L91.0 125.0M81.3 125.6L83.2 130.2M74.0 127.0L74.0 132.0M66.7 125.6L64.8 130.2M60.6 121.4L57.0 125.0M56.4 115.3L51.8 117.2M55.0 108.0L50.0 108.0M56.4 100.7L51.8 98.8M60.6 94.6L57.0 91.0M66.7 90.4L64.8 85.8M74.0 89.0L74.0 84.0M81.3 90.4L83.2 85.8M87.4 94.6L91.0 91.0M91.6 100.7L96.2 98.8M185.0 108.0L190.0 108.0M183.6 115.3L188.2 117.2M179.4 121.4L183.0 125.0M173.3 125.6L175.2 130.2M166.0 127.0L166.0 132.0M158.7 125.6L156.8 130.2M152.6 121.4L149.0 125.0M148.4 115.3L143.8 117.2M147.0 108.0L142.0 108.0M148.4 100.7L143.8 98.8M152.6 94.6L149.0 91.0M158.7 90.4L156.8 85.8M166.0 89.0L166.0 84.0M173.3 90.4L175.2 85.8M179.4 94.6L183.0 91.0M183.6 100.7L188.2 98.8" stroke-width="1.2" opacity=".6"/>
+          </g></svg>
+          <h3>Clearpath Warthog</h3>
+          <p class="binomial">Phacochoerus robustus</p>
+          <dl>
+            <dt>Habitat</dt><dd>Desert test sites for Sandia, and the simulated village in my thesis</dd>
+            <dt>Behavior</dt><dd>Field-tested for Sandia. In my thesis simulations it played the follower while a quadrotor watched from above.</dd>
+            <dt>Field marks</dt><dd>Big all-terrain tires and a tall sensor mast.</dd>
+          </dl>
+        </article>
+
+        <article class="specimen">
+          <svg class="drawing" viewBox="0 0 240 150" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 132h200" stroke-width="1" opacity=".45"/>
+            <path d="M66 82h108l8 8v12l-6 6H64l-6-6V90z"/>
+            <path d="M76 82v-6h88v6"/>
+            <path d="M106 76V58h28v18"/><ellipse cx="120" cy="58" rx="14" ry="3"/><path d="M106 64h28M106 70h28" stroke-width="1"/>
+            <rect x="160" y="66" width="20" height="9" rx="2"/><circle cx="166" cy="70.5" r="1.4"/><circle cx="174" cy="70.5" r="1.4"/><path d="M170 75v7"/>
+            <circle cx="84" cy="116" r="15"/><circle cx="84" cy="116" r="5"/>
+            <circle cx="156" cy="116" r="15"/><circle cx="156" cy="116" r="5"/>
+          </g></svg>
+          <h3>Clearpath Jackal</h3>
+          <p class="binomial">Canis aureus mechanicus</p>
+          <dl>
+            <dt>Habitat</dt><dd>ARISE Lab, University of Denver</dd>
+            <dt>Behavior</dt><dd>Ran FORWARD-PF on hardware with the ARL Phoenix autonomy stack, and took goals from study participants wearing AR headsets.</dd>
+            <dt>Field marks</dt><dd>Velodyne VLP-16 LiDAR for SLAM; Intel RealSense camera for detection.</dd>
+          </dl>
+        </article>
+
+        <article class="specimen">
+          <svg class="drawing" viewBox="0 0 240 150" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M30 132h180" stroke-width="1" opacity=".45"/>
+            <rect x="76" y="100" width="88" height="6" rx="1"/>
+            <rect x="76" y="78" width="88" height="6" rx="1"/>
+            <rect x="76" y="56" width="88" height="6" rx="1"/>
+            <path d="M84 84v16M156 84v16M84 62v16M156 62v16M120 84v16" stroke-width="1.4"/>
+            <path d="M108 56V46h24v10"/><ellipse cx="120" cy="46" rx="12" ry="2.5"/>
+            <rect x="164" y="70" width="10" height="10" rx="2"/><circle cx="170.5" cy="75" r="2"/>
+            <circle cx="104" cy="118" r="13"/><circle cx="104" cy="118" r="4"/>
+            <path d="M150 106v18"/><circle cx="150" cy="127" r="5"/>
+          </g></svg>
+          <h3>TurtleBot</h3>
+          <p class="binomial">Testudo sequens</p>
+          <dl>
+            <dt>Habitat</dt><dd>ARISE Lab, University of Denver</dd>
+            <dt>Behavior</dt><dd>Where my thesis work began: camera bearing plus LiDAR range, with bounding-box size as the fallback past 4 m. It also sent a drone to the person it found.</dd>
+            <dt>Field marks</dt><dd>2D LiDAR; forward-facing monocular camera.</dd>
+          </dl>
+        </article>
+
+        <article class="specimen">
+          <svg class="drawing" viewBox="0 0 240 150" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M94 49l52 52M146 49l-52 52"/>
+            <rect x="108" y="63" width="24" height="24" rx="4"/><circle cx="120" cy="69" r="1.5"/>
+            <circle cx="94" cy="49" r="5"/><circle cx="146" cy="49" r="5"/><circle cx="94" cy="101" r="5"/><circle cx="146" cy="101" r="5"/>
+            <g stroke-width="1.2" opacity=".6">
+              <ellipse cx="94" cy="49" rx="20" ry="4" transform="rotate(-20 94 49)"/>
+              <ellipse cx="146" cy="49" rx="20" ry="4" transform="rotate(25 146 49)"/>
+              <ellipse cx="94" cy="101" rx="20" ry="4" transform="rotate(30 94 101)"/>
+              <ellipse cx="146" cy="101" rx="20" ry="4" transform="rotate(-15 146 101)"/>
+            </g>
+            <path d="M170 128h40M170 124v8M210 124v8" stroke-width="1" opacity=".6"/>
+          </g></svg>
+          <h3>Bitcraze Crazyflie 2.1</h3>
+          <p class="binomial">Musca palmaris</p>
+          <dl>
+            <dt>Habitat</dt><dd>ARISE Lab flight space, tracked by OptiTrack</dd>
+            <dt>Behavior</dt><dd>Spatially tasked by the ground robot to fly where it can keep the person in view.</dd>
+            <dt>Field marks</dt><dd>Palm-sized; later fitted with a 320×320 grayscale camera.</dd>
+          </dl>
+        </article>
+
+        <article class="specimen honorable">
+          <svg class="drawing" viewBox="0 0 240 150" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M30 140h180" stroke-width="1" opacity=".45"/>
+            <path d="M98 140L116 60M142 140L124 60"/>
+            <path d="M101 126h38M105 108h30M109 90h22M113 72h14M101 126l34-18M105 108l26-18M109 90l18-18" stroke-width="1.1" opacity=".65"/>
+            <path d="M112 60h16"/>
+            <circle cx="120" cy="38" r="23"/><circle cx="120" cy="38" r="6"/>
+            <path d="M126.0 38.0L143.0 38.0M125.6 40.1L141.6 45.9M124.6 41.9L137.6 52.8M123.0 43.2L131.5 57.9M121.0 43.9L124.0 60.7M119.0 43.9L116.0 60.7M117.0 43.2L108.5 57.9M115.4 41.9L102.4 52.8M114.4 40.1L98.4 45.9M114.0 38.0L97.0 38.0M114.4 35.9L98.4 30.1M115.4 34.1L102.4 23.2M117.0 32.8L108.5 18.1M119.0 32.1L116.0 15.3M121.0 32.1L124.0 15.3M123.0 32.8L131.5 18.1M124.6 34.1L137.6 23.2M125.6 35.9L141.6 30.1" stroke-width="1.1" opacity=".75"/>
+            <path d="M126 44l44 6"/><path d="M170 42v16l24 2v-18z"/>
+          </g></svg>
+          <span class="tag">Honorable mention</span>
+          <h3>Farm windmill</h3>
+          <p class="binomial">Rotor ventosus</p>
+          <dl>
+            <dt>Habitat</dt><dd>The West Texas desert, and ranchland across the West</dd>
+            <dt>Behavior</dt><dd>A tail vane keeps the wheel facing the wind, and a furling mechanism turns it out of gusts that could wreck it. Closed-loop control, no electronics, no fuel.</dd>
+            <dt>Field marks</dt><dd>Steel lattice tower, a wheel of curved blades, a tail vane.</dd>
+          </dl>
+        </article>
+
+      </div>
+    </section>
+
+    <section id="focus">
+      <h2>What I work on</h2>
+      <p class="lede">Five areas, each with the work that backs it up.</p>
+      <div class="focus">
+        <article>
+          <h3>Learning robot behaviors</h3>
+          <p>Multi-agent reinforcement learning for coordinated behavior: MADDPG policies with centralized training and decentralized execution, carried from a 2D training world into a 3D ROS autonomy stack.</p>
+          <a href="../thesis.html#marl">How the sim-to-real transfer worked</a>
+        </article>
+        <article>
+          <h3>Computer vision &amp; perception</h3>
+          <p>Detecting, tracking, and localizing people: LiDAR–camera fusion, camera-only range estimation, and EKF-filtered tracks that feed motion prediction.</p>
+          <a href="../thesis.html#origins">See the perception pipeline</a>
+        </article>
+        <article>
+          <h3>Navigation</h3>
+          <p>Autonomy where GPS doesn't reach: human-safe navigation in underground mines, SLAM and occupancy-grid planning on Clearpath ground robots, and autonomous testing with Boston Dynamics Spot.</p>
+          <a href="../papers/Ori_ICRA_Workshop_HRT_2023.pdf" target="_blank" rel="noopener">Underground navigation paper</a>
+        </article>
+        <article>
+          <h3>Multi-robot systems</h3>
+          <p>Heterogeneous air–ground teams: FORWARD-PF, my predictive waypoint-assignment algorithm, plus spatial tasking of micro-drones and coordinate-frame alignment across robots.</p>
+          <a href="../thesis.html">Read my thesis, illustrated</a>
+        </article>
+        <article>
+          <h3>Human-robot interaction</h3>
+          <p>Robots that work around and with people: augmented-reality visualization of what a robot perceives, user studies with human participants, and person-following that doesn't depend on the person cooperating.</p>
+          <a href="../papers/Augmented_Reality_Visualization_of_Auton.pdf" target="_blank" rel="noopener">ACM THRI paper</a>
+        </article>
+      </div>
+      <div class="toolbox">
+        <h3>Toolbox</h3>
+        <div class="chips">
+          <span class="chip">Python</span><span class="chip">ROS</span><span class="chip">PettingZoo / Gym</span><span class="chip">MADDPG</span><span class="chip">Unity</span><span class="chip">RViz</span><span class="chip">SLAM</span><span class="chip">Velodyne LiDAR</span><span class="chip">Intel RealSense</span><span class="chip">OptiTrack</span><span class="chip">Boston Dynamics Spot</span><span class="chip">Clearpath Jackal &amp; Warthog</span><span class="chip">Bitcraze Crazyflie</span><span class="chip">AWS</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience">
+      <h2>Work history</h2>
+      <ol class="history" reversed style="margin-top:28px">
+        <li class="current">
+          <p class="when">Aug 2024 – present</p>
+          <div>
+            <h3>Autonomy &amp; Counter-Autonomy Researcher</h3>
+            <p class="org">Sandia National Laboratories, Albuquerque, NM</p>
+            <ul>
+              <li>Lead autonomous testing workflows using the Boston Dynamics Spot robot to evaluate and calibrate physical security sensors.</li>
+              <li>Conduct red-team assessments of physical security systems using autonomous and semi-autonomous platforms to identify adversarial exploitation paths.</li>
+              <li>Research counter-autonomous techniques to detect, mitigate, and defend against adversarial robotic threats.</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Mar 2022 – Aug 2024</p>
+          <div>
+            <h3>Graduate Research Assistant</h3>
+            <p class="org">University of Denver, ARISE Lab</p>
+            <ul>
+              <li>Master's thesis: designed FORWARD-PF, a predictive waypoint-assignment algorithm for air–ground person-following, and benchmarked it against a MADDPG multi-agent RL policy adapted from 2D training to a 3D ROS autonomy stack.</li>
+              <li>Demonstrated robotic GPS-denied human-safe navigation in sparsely featured underground mine environments.</li>
+              <li>Poster presentation at the Robot Teammates in Dynamic Unstructured Environments workshop at ICRA 2023, London.</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Mar 2022 – Jun 2023</p>
+          <div>
+            <h3>Journeyman Fellow</h3>
+            <p class="org">U.S. Army DEVCOM Army Research Laboratory, Adelphi, MD</p>
+            <ul>
+              <li>Developed a heterogeneous air-ground robot system with person-following capabilities.</li>
+              <li>Presented at the Heterogeneity in Multi-Robot Systems workshop at ICRA 2023, London.</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Jan 2021 – Mar 2022</p>
+          <div>
+            <h3>Undergraduate Research Assistant</h3>
+            <p class="org">University of Denver, ARISE Lab</p>
+            <ul>
+              <li>Developed person-following capabilities for a holonomic ground robot platform.</li>
+              <li>Ran HRI studies with human participants; awarded Partners in Scholarship Grant (PiNS).</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">May 2021 – Aug 2021</p>
+          <div>
+            <h3>Software Engineer Intern</h3>
+            <p class="org">Trimble Inc., Westminster, CO</p>
+            <ul>
+              <li>Led development of an event notification service handling 250,000 messages/day on AWS ECS, Lambda, and SQS.</li>
+              <li>Built in Python with Terraform as IaC; delivered features across agile sprints.</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Jun 2019 – Sep 2019</p>
+          <div>
+            <h3>Software Development Intern</h3>
+            <p class="org">Centene Corporation, St. Louis, MO</p>
+            <ul>
+              <li>Converted monolithic code into microservices using Golang to maintain and improve database APIs.</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+      <figure class="mat plate-photo">
+        <img src="../images/web/hri-study.jpg" alt="Participant wearing an AR headset spatially tasking a Jackal robot during an HRI study" loading="lazy">
+        <figcaption><b>Fig. 4</b>Running an HRI study in the ARISE Lab: a participant tasks a Jackal UGV through an augmented-reality headset.</figcaption>
+      </figure>
+    </section>
+
+    <section id="education">
+      <h2>Education</h2>
+      <ol class="history" reversed style="margin-top:28px">
+        <li>
+          <p class="when">2022 – 2024</p>
+          <div>
+            <h3>MS, Computer Science (Robotics)</h3>
+            <p class="org">University of Denver, Ritchie School of Engineering &amp; Computer Science</p>
+            <p class="more">Thesis: <a href="../thesis.html">Heterogeneous Multi-Robot Person-Following in Constrained Environments</a>. Advisor: Dr. Christopher Reardon.</p>
+          </div>
+        </li>
+        <li>
+          <p class="when">2018 – 2022</p>
+          <div>
+            <h3>BS, Computer Science</h3>
+            <p class="org">University of Denver</p>
+            <p class="more">Minors in Entrepreneurship Management and Mathematics.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section id="range">
+      <h2>Range</h2>
+      <p class="lede">Where I hike, ski, and fish, mapped from my own photos. Tap a point to see the picture.</p>
+      <div class="range-wrap">
+        <div class="map-plate">
+          <svg class="range-map" viewBox="0 0 177 154" role="group" aria-label="Map of the western United States with points where my photos were taken">
+            <path class="range" d="M6.3,88.1 C-7.5,65.1 50.0,23.1 75.3,18.7 C100.5,14.4 143.5,49.1 157.7,62.1 C171.9,75.0 160.3,80.8 160.3,96.5 C160.3,112.2 183.3,157.7 157.6,156.3 C132.0,154.9 20.0,111.0 6.3,88.1Z"/>
+            <path class="states" d="M121.6,56.0 L176.0,56.0 L176.0,96.0 L121.6,96.0Z M82.8,46.0 L106.1,46.0 L106.1,56.0 L121.6,56.0 L121.6,96.0 L82.8,96.0Z M106.1,16.0 L160.5,16.0 L160.5,56.0 L106.1,56.0Z M121.6,96.0 L168.6,96.0 L168.6,101.0 L168.2,146.0 L140.5,146.0 L141.2,148.2 L128.2,148.2 L128.2,152.7 L121.6,152.7Z M82.8,96.0 L121.6,96.0 L121.6,152.7 L105.9,152.7 L76.9,141.1 L77.6,138.8 L79.5,135.7 L78.3,131.7 L79.1,127.0 L82.1,123.3 L79.8,118.0 L78.3,116.0 L78.7,110.0 L77.3,105.1 L82.8,104.1Z M36.5,46.0 L82.8,46.0 L82.8,104.1 L77.3,105.1 L78.7,110.0 L78.3,116.0 L36.5,76.0Z M3.9,46.0 L36.5,46.0 L36.5,76.0 L78.3,116.0 L79.8,118.0 L82.1,123.3 L79.1,127.0 L78.3,131.7 L79.5,135.7 L77.6,138.8 L58.9,140.7 L57.9,138.0 L56.7,134.0 L52.1,129.0 L49.0,128.5 L48.2,125.7 L42.7,124.5 L31.9,120.5 L31.5,114.0 L26.4,109.0 L21.8,103.0 L21.4,100.0 L21.0,96.0 L17.1,91.0 L17.1,88.0 L13.2,86.0 L7.8,77.0 L7.0,68.0 L2.3,62.0 L4.7,56.0Z M3.9,46.0 L59.8,46.0 L59.8,23.0 L63.7,11.0 L60.6,6.0 L44.3,6.0 L28.8,10.0 L14.8,10.0 L5.4,3.5 L4.7,16.0 L1.6,36.0Z M59.8,46.0 L106.1,46.0 L106.1,21.0 L92.5,22.0 L87.8,18.0 L78.5,10.0 L80.0,0.0 L59.5,0.0 L59.5,2.0 L60.6,6.0 L63.7,11.0 L59.8,23.0Z M141.2,148.2 L140.5,146.0 L168.2,146.0 L168.2,154.0 L147.3,154.0 L143.8,151.3Z"/>
+            <g class="pt" tabindex="0" role="button" aria-label="Yosemite Valley, California: open photo" data-photo="../images/web/outdoors/half-dome-alpenglow.jpg" data-caption="Last light on Half Dome, Yosemite Valley." transform="translate(39.6 88.6)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Yosemite Valley, California</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Eastern Sierra, California: open photo" data-photo="../images/web/outdoors/sierra-camp-coffee.jpg" data-caption="Camp coffee above a Sierra lake." transform="translate(43.3 89.1)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Eastern Sierra, California</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Long Valley, California: open photo" data-photo="../images/web/outdoors/owens-river.jpg" data-caption="Trout water in Long Valley, Eastern Sierra." transform="translate(45.9 88.8)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Long Valley, California</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Golden Gate, California: open photo" data-photo="../images/web/outdoors/golden-gate-fog.jpg" data-caption="Fog swallowing the Golden Gate Bridge." transform="translate(17.2 87.7)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Golden Gate, California</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Sun Valley, Idaho: open photo" data-photo="../images/web/outdoors/idaho-sage-hike.jpg" data-caption="A sagebrush climb above Sun Valley, Idaho." transform="translate(80.3 28.5)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Sun Valley, Idaho</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Bryce Canyon, Utah: open photo" data-photo="../images/web/outdoors/bryce-wall-street.jpg" data-caption="Wall Street switchbacks, Bryce Canyon." transform="translate(97.4 89.8)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Bryce Canyon, Utah</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Capitol Reef, Utah: open photo" data-photo="../images/web/outdoors/capitol-reef-sulphur-creek.jpg" data-caption="Sulphur Creek, Capitol Reef." transform="translate(104.2 83.0)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Capitol Reef, Utah</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Arches, Utah: open photo" data-photo="../images/web/outdoors/delicate-arch.jpg" data-caption="Delicate Arch, Arches National Park." transform="translate(118.1 78.6)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Arches, Utah</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Grand Canyon, Arizona: open photo" data-photo="../images/web/outdoors/grand-canyon-rainbow.jpg" data-caption="A rainbow over the Grand Canyon from Grandview Point." transform="translate(98.8 106.0)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Grand Canyon, Arizona</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Sedona, Arizona: open photo" data-photo="../images/web/outdoors/sedona-cathedral-rock.jpg" data-caption="Cathedral Rock at golden hour, Sedona." transform="translate(100.2 118.0)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Sedona, Arizona</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Telluride, Colorado: open photo" data-photo="../images/web/outdoors/telluride-chute.jpg" data-caption="Chute skiing at Telluride." transform="translate(131.1 87.1)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Telluride, Colorado</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Mount Elbert, Colorado: open photo" data-photo="../images/web/outdoors/elbert-summit.jpg" data-caption="On top of Mount Elbert, Colorado’s highest peak." transform="translate(141.9 74.8)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Mount Elbert, Colorado</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Rollins Pass, Colorado: open photo" data-photo="../images/web/outdoors/rollins-pass-fog.jpg" data-caption="October fog on Rollins Pass, Colorado." transform="translate(147.7 66.8)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Rollins Pass, Colorado</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="San Luis Valley, Colorado: open photo" data-photo="../images/web/outdoors/san-luis-cottonwoods.jpg" data-caption="Cottonwoods along a San Luis Valley highway." transform="translate(149.6 94.1)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">San Luis Valley, Colorado</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="Rio Grande Gorge, New Mexico: open photo" data-photo="../images/web/outdoors/rio-grande-gorge.jpg" data-caption="The Rio Grande Gorge near Taos." transform="translate(147.4 101.2)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">Rio Grande Gorge, New Mexico</text></g>
+            <g class="pt" tabindex="0" role="button" aria-label="West Texas: open photo" data-photo="../images/web/outdoors/west-texas-windmill.jpg" data-caption="A water-pumping windmill in the West Texas desert." transform="translate(151.5 147.2)"><circle class="hit" r="7"/><circle class="dot" r="2.3"/><text x="4" y="-4">West Texas</text></g>
+            <g class="pt home" tabindex="0" role="button" aria-label="Albuquerque, New Mexico, home: open photo" data-photo="../images/web/outdoors/balloon-fiesta.jpg" data-caption="Balloon Fiesta week over downtown Albuquerque." transform="translate(140.3 115.2)"><circle class="hit" r="8"/><polygon class="star" points="0.00,-5.20 1.29,-1.78 4.95,-1.61 2.09,0.68 3.06,4.21 0.00,2.20 -3.06,4.21 -2.09,0.68 -4.95,-1.61 -1.29,-1.78"/><text x="6" y="-5">Albuquerque, New Mexico</text></g>
+          </svg>
+        </div>
+        <ul class="legend">
+          <li><svg viewBox="0 0 26 18" aria-hidden="true"><rect x="1" y="2" width="24" height="14" rx="5" fill="#efe6d2"/><rect x="1" y="2" width="24" height="14" rx="5" fill="rgba(224,96,31,.22)" stroke="rgba(168,61,20,.7)" stroke-dasharray="2 1.5"/></svg><span>Range</span></li>
+          <li><svg viewBox="0 0 26 18" aria-hidden="true"><circle cx="13" cy="9" r="5" fill="#e0601f" stroke="#efe6d2" stroke-width="1.5"/></svg><span>Photographed here</span></li>
+          <li><svg viewBox="0 0 26 18" aria-hidden="true"><polygon points="13,2 15,7.5 21,7.5 16,11 18,16.5 13,13 8,16.5 10,11 5,7.5 11,7.5" fill="#e8e2cc"/></svg><span>Home: Albuquerque</span></li>
+          <li style="grid-template-columns:1fr"><p>Points are placed from each photo’s location data.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="publications">
+      <h2>Publications</h2>
+      <a class="thesis" href="../thesis.html" style="margin-top:28px">
+        <img src="../images/web/thesis/fig-visibility.jpg" alt="Simulation view showing the drone's field of view, the person's predicted positions, and chosen goals" loading="lazy">
+        <div>
+          <h3>My thesis, illustrated</h3>
+          <p>A plain-English, visual walkthrough of my M.S. thesis: two robots, one person to follow, and a hand-built forecaster versus multi-agent RL, from sim-to-real transfer to hardware.</p>
+          <span class="go">Read the walkthrough</span>
+        </div>
+      </a>
+      <ul class="pubs">
+        <li><a href="../papers/Ori_Miller_MS_Thesis_2024.pdf" target="_blank" rel="noopener">
+          <h3>Heterogeneous Multi-Robot Person-Following in Constrained Environments (M.S. Thesis)</h3>
+          <p class="authors">Ori A. Miller. Advisor: Dr. Christopher Reardon</p>
+          <p class="venue">University of Denver, August 2024</p>
+        </a></li>
+        <li><a href="../papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" target="_blank" rel="noopener">
+          <h3>Heterogeneous Multi-Robot Person-Following in Constrained Environments</h3>
+          <p class="authors">Ori A. Miller, Jason M. Gregory, Christopher Reardon</p>
+          <p class="venue">IEEE SSRR, November 2024</p>
+        </a></li>
+        <li><a href="../papers/Augmented_Reality_Visualization_of_Auton.pdf" target="_blank" rel="noopener">
+          <h3>Augmented Reality Visualization of Autonomous Mobile Robot Change Detection in Uninstrumented Environments</h3>
+          <p class="authors">Christopher Reardon, Jason M. Gregory, Kerstin S. Haring, Benjamin Dossett, Ori A. Miller, Aniekan Inyang</p>
+          <p class="venue">ACM Transactions on Human-Robot Interaction (THRI), 2023</p>
+        </a></li>
+        <li><a href="../papers/Ori_ICRA_Workshop_Multi_Robot_2023.pdf" target="_blank" rel="noopener">
+          <h3>Teaming Heterogeneous Ground and Micro-Aerial Robots for Following of Non-Cooperative Agents</h3>
+          <p class="authors">Ori A. Miller, Christopher Reardon, Jason M. Gregory</p>
+          <p class="venue">Heterogeneity in Multi-Robot Systems Workshop, ICRA, London, May 2023</p>
+        </a></li>
+        <li><a href="../papers/Ori_ICRA_Workshop_HRT_2023.pdf" target="_blank" rel="noopener">
+          <h3>Autonomous Agent-aware Navigation in Underground Mine Environments</h3>
+          <p class="authors">Ori A. Miller, Christopher Reardon</p>
+          <p class="venue">Heterogeneous Multi-Robot Cooperation in Extreme Environments Workshop, ICRA, London, May 2023</p>
+        </a></li>
+      </ul>
+    </section>
+
+    <footer>
+      <p class="colophon"><b>Colophon.</b> Set in Alegreya and Alegreya Sans. The robot plates are drawn as SVG line art rather than photographed, and the range map is drawn from coordinates, so the guide stays light. Hand-written HTML with no trackers.</p>
+      <p class="copy">&copy; 2026 Ori Miller</p>
+    </footer>
+  </main>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <figure class="mat"><img alt=""><figcaption></figcaption></figure>
+  </div>
+
+  <script>
+    const minibar = document.getElementById('minibar');
+    const cover = document.querySelector('.cover');
+    window.addEventListener('scroll', () => minibar.classList.toggle('show', window.scrollY > cover.offsetHeight * 0.85), { passive: true });
+
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = lightbox.querySelector('img');
+    const lbCap = lightbox.querySelector('figcaption');
+    function openPhoto(el) {
+      lbImg.src = el.dataset.photo; lbImg.alt = el.dataset.caption; lbCap.textContent = el.dataset.caption;
+      lightbox.classList.add('open');
+    }
+    document.querySelectorAll('[data-photo]').forEach(el => {
+      el.addEventListener('click', () => openPhoto(el));
+      if (el.tagName.toLowerCase() === 'g') el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPhoto(el); } });
+    });
+    lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.classList.remove('open'); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ori Miller — Robotics Researcher</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f2b441' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M3 19c3-1 4-5 7-6s5 2 8 0 3-6 3-6'/%3E%3Cpath d='M6 21c2-1 4-3 7-3s5 1 8-1' opacity='.6'/%3E%3Cpath d='M2 15c3-2 4-6 8-8s6 0 9-3' opacity='.6'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@1,8..60,400;1,8..60,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* A USGS quad read by headlamp: spruce-dark ground, brown contour ink,
+       hydrography blue for links, and one aspen-gold route. */
+    :root {
+      --map: #111915;
+      --map-2: #17211b;
+      --line: #2a392f;
+      --contour: #7a5636;
+      --route: #f2b441;
+      --route-ink: #1d1404;
+      --water: #8dbdd6;
+      --paper: #ede6d6;
+      --muted: #a4a794;
+      --sans: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --serif: 'Source Serif 4', Georgia, serif;
+      --line-x: 40px;
+      --pad-l: 100px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--map);
+      color: var(--paper);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: var(--water); text-underline-offset: 3px; }
+    :focus-visible { outline: 2px solid var(--route); outline-offset: 3px; border-radius: 4px; }
+
+    /* Slim bar after the hero */
+    .minibar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 250;
+      background: rgba(17, 25, 21, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+    .minibar.show { transform: translateY(0); }
+    .minibar-inner {
+      max-width: 980px; margin: 0 auto; padding: 11px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 20px;
+    }
+    .minibar .name { font-weight: 700; font-size: 0.9rem; color: var(--paper); text-decoration: none; white-space: nowrap; }
+    .minibar nav { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; }
+    .minibar nav::-webkit-scrollbar { display: none; }
+    .minibar nav a { font-size: 0.82rem; color: var(--muted); text-decoration: none; white-space: nowrap; }
+    .minibar nav a:hover { color: var(--route); }
+
+    /* Hero: a contour map with a live route to the summit */
+    .hero {
+      position: relative;
+      z-index: 1;
+      background: var(--map);
+      min-height: min(100svh, 880px);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+    .map-area { position: absolute; inset: 0; }
+    .map-area canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
+    .hero::before {
+      content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(90deg, rgba(17, 25, 21, 0.95) 0%, rgba(17, 25, 21, 0.86) 30%, rgba(17, 25, 21, 0) 56%);
+    }
+    .summit {
+      position: absolute; z-index: 2;
+      left: 72%; top: 47%;
+      width: clamp(180px, 21vw, 300px); aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      border-radius: 50%; padding: 4px;
+      background: conic-gradient(from 200deg, #f2b441, #c8642c, #f2b441);
+      box-shadow: 0 0 0 10px rgba(17, 25, 21, 0.6), 0 18px 60px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+    }
+    .summit img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+    .hero-text { position: relative; z-index: 2; padding: 110px 24px 140px 6vw; max-width: calc(560px + 6vw); }
+    .hero h1 {
+      font-size: clamp(3rem, 6.6vw, 5.4rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 0.92;
+      margin-bottom: 26px;
+    }
+    .hero .tagline { font-size: 1.15rem; color: #d6d0bf; max-width: 33ch; margin-bottom: 16px; }
+    .place {
+      font-family: var(--serif); font-style: italic; font-size: 1.05rem; color: var(--muted);
+      margin-bottom: 34px;
+    }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      height: 44px; padding: 0 18px;
+      border-radius: 6px; border: 1px solid var(--line);
+      background: rgba(23, 33, 27, 0.85);
+      color: var(--paper); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .btn:hover { border-color: var(--route); }
+    .btn.primary { background: var(--route); border-color: var(--route); color: var(--route-ink); }
+    .btn.primary:hover { background: #f8c867; }
+    .btn.icon { width: 44px; padding: 0; }
+    .btn svg { width: 18px; height: 18px; }
+
+    .map-note {
+      position: absolute; z-index: 2; right: 20px; bottom: 64px;
+      max-width: 360px; text-align: right; padding: 8px 10px; border-radius: 6px;
+      background: rgba(17, 25, 21, 0.72);
+      font-size: 0.78rem; line-height: 1.5; color: var(--muted);
+    }
+    .map-note .stats { color: var(--route); font-variant-numeric: tabular-nums; }
+    .map-note button {
+      font: inherit; color: var(--water); background: none; border: 0; padding: 0;
+      text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+    }
+    .map-note button[hidden] { display: none; }
+
+    /* Photo mosaic of outdoor shots behind everything below the map, in natural color but shaded.
+       It dims further while a reading panel fills the middle of the screen. */
+    .mosaic {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 0;
+      display: grid; gap: 5px; padding: 5px; grid-auto-flow: dense;
+      will-change: transform; transition: opacity 0.9s ease;
+    }
+    .mosaic.reading { opacity: 0.45; }
+    .tile { position: relative; overflow: hidden; border-radius: 6px; background: #1b2620; cursor: zoom-in; }
+    .tile img { width: 100%; height: 100%; object-fit: cover; }
+    .tile::after { content: ''; position: absolute; inset: 0; background: rgba(8, 12, 10, 0.56); transition: opacity 0.35s ease; pointer-events: none; }
+    .tile.lit { z-index: 2; box-shadow: 0 0 0 2px var(--route); }
+    .tile.lit::after { opacity: 0; }
+
+    /* The trail: one dashed line down the page, drawn in gold as you read.
+       Text sits on panels; the gaps between them are clearings onto the photos. */
+    .trail { position: relative; z-index: 1; max-width: 940px; margin: 0 auto; padding: 0 20px 110px; pointer-events: none; }
+    .trail > section, .trail > footer { pointer-events: auto; }
+    .trail-line { position: absolute; left: calc(20px + var(--line-x) - 1px); top: 0; bottom: 0; width: 2px; z-index: 2; pointer-events: none; }
+    .trail-line span { position: absolute; left: 0; top: 0; width: 2px; }
+    .trail-line .base { bottom: 0; background: repeating-linear-gradient(180deg, var(--line) 0 8px, transparent 8px 14px); }
+    .trail-line .done { height: 0; background: repeating-linear-gradient(180deg, var(--route) 0 8px, transparent 8px 14px); }
+
+    .trail > section, .trail > footer {
+      position: relative;
+      background: rgba(17, 25, 21, 0.97);
+      border: 1px solid rgba(42, 57, 47, 0.9);
+      border-radius: 18px;
+      padding: 60px 52px 64px var(--pad-l);
+      margin-top: 132px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    }
+    section h2 {
+      position: relative;
+      font-size: 1.85rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1.2;
+      margin-bottom: 28px;
+    }
+    .wp {
+      position: absolute; left: calc(var(--line-x) - var(--pad-l) - 8px); top: 50%;
+      width: 16px; height: 16px; margin-top: -8px;
+      border-radius: 50%; border: 2px solid var(--line); background: var(--map);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    .wp.passed { border-color: var(--route); background: var(--route); }
+
+    .lead { font-size: 1.0625rem; color: #d2ccbb; line-height: 1.8; max-width: 66ch; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 6px;
+      font: 500 0.82rem/1.4 var(--sans);
+      background: var(--map-2); border: 1px solid var(--line); color: var(--muted);
+    }
+    button.chip { cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+    button.chip:hover { border-color: var(--route); color: var(--paper); }
+    button.chip svg { width: 12px; height: 12px; opacity: 0.6; }
+
+    .strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 34px; }
+    .strip img { aspect-ratio: 1; object-fit: cover; border-radius: 8px; width: 100%; }
+    figcaption {
+      font-family: var(--serif); font-style: italic; font-size: 0.92rem; color: var(--muted);
+      margin-top: 8px; line-height: 1.45;
+    }
+
+    /* Focus areas as a map legend */
+    .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 30px 40px; }
+    .legend-item { display: grid; grid-template-columns: 40px 1fr; gap: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+    .legend-item:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .sym {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1.5px solid var(--route); color: var(--route);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sym svg { width: 19px; height: 19px; }
+    .legend-item h3 { font-size: 1.02rem; font-weight: 700; margin-bottom: 4px; }
+    .legend-item p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .legend-item a { display: inline-block; margin-top: 8px; font-size: 0.86rem; font-weight: 600; text-decoration: none; }
+    .legend-item a:hover { text-decoration: underline; }
+    .toolbox { margin-top: 36px; }
+    .toolbox h3 { font-size: 0.95rem; font-weight: 700; color: var(--paper); margin-bottom: 4px; }
+    .toolbox .chips { margin-top: 10px; }
+
+    /* Roles as segments of the route */
+    .route { list-style: none; display: grid; gap: 34px; }
+    .seg { position: relative; display: grid; grid-template-columns: 148px 1fr; gap: 24px; }
+    .seg::before {
+      content: ''; position: absolute; left: calc(var(--line-x) - var(--pad-l) - 7px); top: 7px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--map); border: 2px solid var(--muted);
+    }
+    .seg.current::before { background: var(--route); border-color: var(--route); animation: pulse 2.4s ease-out infinite; }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(242, 180, 65, 0.5); }
+      70% { box-shadow: 0 0 0 10px rgba(242, 180, 65, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(242, 180, 65, 0); }
+    }
+    .when { font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+    .seg h3 { font-size: 1.05rem; font-weight: 700; line-height: 1.4; }
+    .org { font-family: var(--serif); font-style: italic; color: var(--route); font-size: 1rem; margin: 2px 0 10px; }
+    .seg ul { list-style: none; display: grid; gap: 6px; }
+    .seg li, .seg p.note { font-size: 0.92rem; color: #c9c4b3; line-height: 1.6; }
+    .seg li { position: relative; padding-left: 18px; }
+    .seg li::before { content: ''; position: absolute; left: 0; top: 0.8em; width: 9px; height: 1px; background: var(--contour); }
+    .seg p.note a { text-decoration: none; }
+    .seg p.note a:hover { text-decoration: underline; }
+
+    .wide-photo { margin-top: 40px; }
+    .wide-photo img { width: 100%; aspect-ratio: 21 / 9; object-fit: cover; border-radius: 8px; }
+
+    /* Research */
+    .featured {
+      display: grid; grid-template-columns: 1.1fr 1fr; gap: 0;
+      border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+      background: var(--map-2); color: inherit; text-decoration: none; margin-bottom: 28px;
+      transition: border-color 0.25s ease;
+    }
+    .featured:hover { border-color: var(--route); }
+    .featured img { width: 100%; height: 100%; object-fit: cover; min-height: 200px; }
+    .featured div { padding: 24px 26px; }
+    .featured h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+    .featured p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .featured .go { display: inline-block; margin-top: 14px; color: var(--water); font-weight: 600; font-size: 0.88rem; }
+    .pubs { list-style: none; display: grid; gap: 4px; }
+    .pubs a {
+      display: block; padding: 16px 0; border-top: 1px solid var(--line);
+      color: inherit; text-decoration: none;
+    }
+    .pubs a:hover h3 { color: var(--route); }
+    .pubs h3 { font-size: 1rem; font-weight: 600; line-height: 1.5; transition: color 0.2s ease; }
+    .pubs .authors { font-size: 0.86rem; color: var(--muted); margin-top: 4px; }
+    .pubs .venue { font-family: var(--serif); font-style: italic; font-size: 0.95rem; color: var(--water); }
+
+    /* Trail log */
+    .log-note { font-size: 0.88rem; color: var(--muted); margin: -16px 0 26px; }
+    .log { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 20px; }
+    .log img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; }
+    .log figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .elev {
+      font-family: var(--sans); font-style: normal; font-weight: 600; font-size: 0.8rem;
+      color: var(--route); font-variant-numeric: tabular-nums; white-space: nowrap;
+    }
+
+    .trail > footer { padding-top: 44px; padding-bottom: 48px; }
+    .end { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; max-width: 60ch; }
+    .end svg { width: 34px; height: 34px; color: var(--route); }
+    .end p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+    .end b { color: var(--paper); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .end em { font-family: var(--serif); color: var(--paper); font-size: 1rem; }
+    .copy { font-size: 0.8rem; color: var(--muted); margin-top: 24px; }
+
+    .lightbox {
+      position: fixed; inset: 0; z-index: 400;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      padding: 28px 20px; background: rgba(10, 15, 12, 0.92); backdrop-filter: blur(6px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease; cursor: zoom-out;
+    }
+    .lightbox.open { opacity: 1; pointer-events: auto; }
+    .lightbox img { max-width: min(920px, 100%); max-height: 78vh; width: auto; border-radius: 10px; }
+    .lightbox figcaption { text-align: center; max-width: 60ch; }
+
+    @media (min-width: 761px) {
+      .hero { border-bottom: 0; -webkit-mask-image: linear-gradient(#000 calc(100% - 60px), transparent); mask-image: linear-gradient(#000 calc(100% - 60px), transparent); }
+    }
+
+    @media (max-width: 760px) {
+      :root { --line-x: 18px; --pad-l: 42px; }
+      .hero { flex-direction: column; align-items: stretch; min-height: 0; }
+      .hero::before { display: none; }
+      .map-area { position: relative; height: 400px; }
+      .summit { left: 50%; top: 44%; width: 168px; }
+      .map-note { position: static; text-align: left; max-width: none; padding: 12px 20px 0; }
+      .hero-text { padding: 26px 20px 52px; max-width: none; }
+      .trail { padding: 0 10px 72px; }
+      .trail-line { left: calc(10px + var(--line-x) - 1px); }
+      .trail > section, .trail > footer { padding: 44px 18px 48px var(--pad-l); margin-top: 84px; border-radius: 14px; }
+      .wp { left: calc(var(--line-x) - var(--pad-l) - 7px); width: 14px; height: 14px; margin-top: -7px; }
+      .seg { grid-template-columns: 1fr; gap: 4px; }
+      .seg::before { left: calc(var(--line-x) - var(--pad-l) - 7px); }
+      .legend, .log { grid-template-columns: 1fr; }
+      .strip { grid-template-columns: 1fr; }
+      .strip img { aspect-ratio: 4 / 3; }
+      .wide-photo img { aspect-ratio: 4 / 3; }
+      .featured { grid-template-columns: 1fr; }
+      .minibar .name { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .mosaic { transition: none; }
+      .seg.current::before { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mosaic" id="mosaic" aria-hidden="true"></div>
+  <div class="minibar" id="minibar">
+    <div class="minibar-inner">
+      <a class="name" href="#top">Ori Miller</a>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#focus">Focus</a>
+        <a href="#experience">Experience</a>
+        <a href="#education">Education</a>
+        <a href="#publications">Research</a>
+        <a href="#trail-log">Trail log</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="hero" id="top">
+    <div class="map-area">
+      <canvas id="map" role="img" aria-label="Topographic map with a dashed route climbing to Ori's portrait at the summit"></canvas>
+      <div class="summit"><img src="../images/web/ori-portrait.jpg" alt="Ori Miller"></div>
+    </div>
+    <p class="map-note">
+      Tap the map to set a goal. A* replans over a slope-cost grid that treats the lake as an obstacle and makes creek crossings expensive, the way a ground robot plans around terrain.
+      <span class="stats" id="stats"></span>
+      <button type="button" id="reset" hidden>Back to the summit</button>
+    </p>
+    <div class="hero-text">
+      <h1>Ori Miller</h1>
+      <p class="tagline">Robotics engineer building robots that learn, see, and work alongside people. Currently an Autonomy &amp; Counter-Autonomy Researcher at Sandia National Laboratories.</p>
+      <p class="place">Albuquerque, New Mexico</p>
+      <div class="actions">
+        <a class="btn primary" href="../resume.html">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+          Résumé
+        </a>
+        <a class="btn icon" href="https://github.com/OriMiller" aria-label="GitHub" target="_blank" rel="noopener">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </a>
+        <a class="btn icon" href="https://linkedin.com/in/ori-miller-du" aria-label="LinkedIn" target="_blank" rel="noopener">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="trail" id="trail">
+    <div class="trail-line" aria-hidden="true"><span class="base"></span><span class="done" id="trail-done"></span></div>
+
+    <section id="about">
+      <h2><span class="wp" aria-hidden="true"></span>About</h2>
+      <p class="lead">Originally from St. Louis, Missouri. I hold an MS in Computer Science (Robotics) and a BS in Computer Science from the University of Denver, where I spent three years as a Research Assistant in the ARISE Lab under Dr. Christopher Reardon. I now work at Sandia National Laboratories as an Autonomy &amp; Counter-Autonomy Researcher, focusing on autonomous testing, physical security evaluation, and adversarial robotics.</p>
+      <div class="chips">
+        <button class="chip" data-photo="../images/web/hobby-photography.jpg" data-caption="Through the lens: a hummingbird posing at a feeder.">Photography<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+        <button class="chip" data-photo="../images/web/hobby-flyfishing.jpg" data-caption="Casting on the Merced River below El Capitan, Yosemite.">Fly fishing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+        <span class="chip">Ultimate frisbee</span>
+        <button class="chip" data-photo="../images/web/hobby-skiing.jpg" data-caption="Scoping lines on a backcountry day in the Rockies.">Skiing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+        <button class="chip" data-photo="../images/web/hobby-biking.jpg" data-caption="Fall gravel miles through the aspens.">Biking<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+        <button class="chip" data-photo="../images/web/hobby-running.jpg" data-caption="Sunset trail run in the foothills.">Running<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+        <button class="chip" data-photo="../images/web/hobby-climbing.jpg" data-caption="On belay under New Mexico skies.">Climbing<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></button>
+      </div>
+      <div class="strip">
+        <figure>
+          <img src="../images/web/ori-robot.jpg" alt="Ori kneeling beside an AgileX Scout Mini robot on a polished floor" loading="lazy" style="object-position: 50% 42%">
+          <figcaption>Hands-on with an AgileX Scout Mini</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/web/warthog-wipp.jpg" alt="Ori standing beside a Warthog ground robot on a desert test site" loading="lazy">
+          <figcaption>Field testing a Warthog UGV for Sandia</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/web/poster.jpg" alt="Ori presenting a research poster at the University of Denver" loading="lazy">
+          <figcaption>Presenting ground–air teaming research at DU</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="focus">
+      <h2><span class="wp" aria-hidden="true"></span>What I work on</h2>
+      <div class="legend">
+        <div class="legend-item">
+          <span class="sym"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg></span>
+          <div>
+            <h3>Learning robot behaviors</h3>
+            <p>Multi-agent reinforcement learning for coordinated behavior: MADDPG policies with centralized training and decentralized execution, carried from a 2D training world into a 3D ROS autonomy stack.</p>
+            <a href="../thesis.html#marl">How the sim-to-real transfer worked</a>
+          </div>
+        </div>
+        <div class="legend-item">
+          <span class="sym"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
+          <div>
+            <h3>Computer vision &amp; perception</h3>
+            <p>Detecting, tracking, and localizing people: LiDAR–camera fusion, camera-only range estimation, and EKF-filtered tracks that feed motion prediction.</p>
+            <a href="../thesis.html#origins">See the perception pipeline</a>
+          </div>
+        </div>
+        <div class="legend-item">
+          <span class="sym"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg></span>
+          <div>
+            <h3>Navigation</h3>
+            <p>Autonomy where GPS doesn't reach: human-safe navigation in underground mines, SLAM and occupancy-grid planning on Clearpath ground robots, and autonomous testing with Boston Dynamics Spot.</p>
+            <a href="../papers/Ori_ICRA_Workshop_HRT_2023.pdf" target="_blank" rel="noopener">Underground navigation paper</a>
+          </div>
+        </div>
+        <div class="legend-item">
+          <span class="sym"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg></span>
+          <div>
+            <h3>Multi-robot systems</h3>
+            <p>Heterogeneous air–ground teams: FORWARD-PF, my predictive waypoint-assignment algorithm, plus spatial tasking of micro-drones and coordinate-frame alignment across robots.</p>
+            <a href="../thesis.html">Read my thesis, illustrated</a>
+          </div>
+        </div>
+        <div class="legend-item">
+          <span class="sym"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></span>
+          <div>
+            <h3>Human-robot interaction</h3>
+            <p>Robots that work around and with people: augmented-reality visualization of what a robot perceives, user studies with human participants, and person-following that doesn't depend on the person cooperating.</p>
+            <a href="../papers/Augmented_Reality_Visualization_of_Auton.pdf" target="_blank" rel="noopener">ACM THRI paper</a>
+          </div>
+        </div>
+      </div>
+      <div class="toolbox">
+        <h3>Toolbox</h3>
+        <div class="chips">
+          <span class="chip">Python</span><span class="chip">ROS</span><span class="chip">PettingZoo / Gym</span><span class="chip">MADDPG</span><span class="chip">Unity</span><span class="chip">RViz</span><span class="chip">SLAM</span><span class="chip">Velodyne LiDAR</span><span class="chip">Intel RealSense</span><span class="chip">OptiTrack</span><span class="chip">Boston Dynamics Spot</span><span class="chip">Clearpath Jackal &amp; Warthog</span><span class="chip">Bitcraze Crazyflie</span><span class="chip">AWS</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience">
+      <h2><span class="wp" aria-hidden="true"></span>Work history</h2>
+      <ol class="route" reversed>
+        <li class="seg current">
+          <div class="when">Aug 2024 – Present</div>
+          <div>
+            <h3>Autonomy &amp; Counter-Autonomy Researcher</h3>
+            <p class="org">Sandia National Laboratories, Albuquerque, NM</p>
+            <ul>
+              <li>Lead autonomous testing workflows using the Boston Dynamics Spot robot to evaluate and calibrate physical security sensors.</li>
+              <li>Conduct red-team assessments of physical security systems using autonomous and semi-autonomous platforms to identify adversarial exploitation paths.</li>
+              <li>Research counter-autonomous techniques to detect, mitigate, and defend against adversarial robotic threats.</li>
+            </ul>
+          </div>
+        </li>
+        <li class="seg">
+          <div class="when">Mar 2022 – Aug 2024</div>
+          <div>
+            <h3>Graduate Research Assistant</h3>
+            <p class="org">University of Denver, ARISE Lab</p>
+            <ul>
+              <li>Master's thesis: designed FORWARD-PF, a predictive waypoint-assignment algorithm for air–ground person-following, and benchmarked it against a MADDPG multi-agent RL policy adapted from 2D training to a 3D ROS autonomy stack.</li>
+              <li>Demonstrated robotic GPS-denied human-safe navigation in sparsely featured underground mine environments.</li>
+              <li>Poster presentation at the Robot Teammates in Dynamic Unstructured Environments workshop at ICRA 2023, London.</li>
+            </ul>
+          </div>
+        </li>
+        <li class="seg">
+          <div class="when">Mar 2022 – Jun 2023</div>
+          <div>
+            <h3>Journeyman Fellow</h3>
+            <p class="org">U.S. Army DEVCOM Army Research Laboratory, Adelphi, MD</p>
+            <ul>
+              <li>Developed a heterogeneous air-ground robot system with person-following capabilities.</li>
+              <li>Presented at the Heterogeneity in Multi-Robot Systems workshop at ICRA 2023, London.</li>
+            </ul>
+          </div>
+        </li>
+        <li class="seg">
+          <div class="when">Jan 2021 – Mar 2022</div>
+          <div>
+            <h3>Undergraduate Research Assistant</h3>
+            <p class="org">University of Denver, ARISE Lab</p>
+            <ul>
+              <li>Developed person-following capabilities for a holonomic ground robot platform.</li>
+              <li>Ran HRI studies with human participants; awarded Partners in Scholarship Grant (PiNS).</li>
+            </ul>
+          </div>
+        </li>
+        <li class="seg">
+          <div class="when">May 2021 – Aug 2021</div>
+          <div>
+            <h3>Software Engineer Intern</h3>
+            <p class="org">Trimble Inc., Westminster, CO</p>
+            <ul>
+              <li>Led development of an event notification service handling 250,000 messages/day on AWS ECS, Lambda, and SQS.</li>
+              <li>Built in Python with Terraform as IaC; delivered features across agile sprints.</li>
+            </ul>
+          </div>
+        </li>
+        <li class="seg">
+          <div class="when">Jun 2019 – Sep 2019</div>
+          <div>
+            <h3>Software Development Intern</h3>
+            <p class="org">Centene Corporation, St. Louis, MO</p>
+            <ul>
+              <li>Converted monolithic code into microservices using Golang to maintain and improve database APIs.</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+      <figure class="wide-photo">
+        <img src="../images/web/hri-study.jpg" alt="Participant wearing an AR headset spatially tasking a Jackal robot during an HRI study" loading="lazy">
+        <figcaption>Running an HRI study in the ARISE Lab: a participant tasks a Jackal UGV through an augmented-reality headset.</figcaption>
+      </figure>
+    </section>
+
+    <section id="education">
+      <h2><span class="wp" aria-hidden="true"></span>Education</h2>
+      <ol class="route" reversed>
+        <li class="seg">
+          <div class="when">2022 – 2024</div>
+          <div>
+            <h3>MS, Computer Science (Robotics)</h3>
+            <p class="org">University of Denver, Ritchie School of Engineering &amp; Computer Science</p>
+            <p class="note">Thesis: <a href="../thesis.html">Heterogeneous Multi-Robot Person-Following in Constrained Environments</a>. Advisor: Dr. Christopher Reardon.</p>
+          </div>
+        </li>
+        <li class="seg">
+          <div class="when">2018 – 2022</div>
+          <div>
+            <h3>BS, Computer Science</h3>
+            <p class="org">University of Denver</p>
+            <p class="note">Minors in Entrepreneurship Management and Mathematics.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section id="publications">
+      <h2><span class="wp" aria-hidden="true"></span>Research</h2>
+      <a class="featured" href="../thesis.html">
+        <img src="../images/web/thesis/fig-path-map.jpg" alt="Top-down view of the simulated village with nine numbered person paths" loading="lazy">
+        <div>
+          <h3>My thesis, illustrated</h3>
+          <p>A plain-English, visual walkthrough of my M.S. thesis: two robots, one person to follow, and a hand-built forecaster versus multi-agent RL, from sim-to-real transfer to hardware.</p>
+          <span class="go">Read the walkthrough</span>
+        </div>
+      </a>
+      <ul class="pubs">
+        <li><a href="../papers/Ori_Miller_MS_Thesis_2024.pdf" target="_blank" rel="noopener">
+          <h3>Heterogeneous Multi-Robot Person-Following in Constrained Environments (M.S. Thesis)</h3>
+          <p class="authors">Ori A. Miller. Advisor: Dr. Christopher Reardon</p>
+          <p class="venue">University of Denver, August 2024</p>
+        </a></li>
+        <li><a href="../papers/Heterogeneous_Multi-Robot_Person-Following_in_Constrained_Environments.pdf" target="_blank" rel="noopener">
+          <h3>Heterogeneous Multi-Robot Person-Following in Constrained Environments</h3>
+          <p class="authors">Ori A. Miller, Jason M. Gregory, Christopher Reardon</p>
+          <p class="venue">IEEE SSRR, November 2024</p>
+        </a></li>
+        <li><a href="../papers/Augmented_Reality_Visualization_of_Auton.pdf" target="_blank" rel="noopener">
+          <h3>Augmented Reality Visualization of Autonomous Mobile Robot Change Detection in Uninstrumented Environments</h3>
+          <p class="authors">Christopher Reardon, Jason M. Gregory, Kerstin S. Haring, Benjamin Dossett, Ori A. Miller, Aniekan Inyang</p>
+          <p class="venue">ACM Transactions on Human-Robot Interaction (THRI), 2023</p>
+        </a></li>
+        <li><a href="../papers/Ori_ICRA_Workshop_Multi_Robot_2023.pdf" target="_blank" rel="noopener">
+          <h3>Teaming Heterogeneous Ground and Micro-Aerial Robots for Following of Non-Cooperative Agents</h3>
+          <p class="authors">Ori A. Miller, Christopher Reardon, Jason M. Gregory</p>
+          <p class="venue">Heterogeneity in Multi-Robot Systems Workshop, ICRA, London, May 2023</p>
+        </a></li>
+        <li><a href="../papers/Ori_ICRA_Workshop_HRT_2023.pdf" target="_blank" rel="noopener">
+          <h3>Autonomous Agent-aware Navigation in Underground Mine Environments</h3>
+          <p class="authors">Ori A. Miller, Christopher Reardon</p>
+          <p class="venue">Heterogeneous Multi-Robot Cooperation in Extreme Environments Workshop, ICRA, London, May 2023</p>
+        </a></li>
+      </ul>
+    </section>
+
+    <section id="trail-log">
+      <h2><span class="wp" aria-hidden="true"></span>Trail log</h2>
+      <p class="log-note">Elevations come from each photo's GPS altitude, rounded to the nearest 10 ft.</p>
+      <div class="log">
+        <figure>
+          <img src="../images/web/outdoors/elbert-summit.jpg" alt="Rocky summit view over snow-streaked Colorado peaks" loading="lazy">
+          <figcaption><span>Summit of Mount Elbert, Colorado</span><span class="elev">14,430 ft</span></figcaption>
+        </figure>
+        <figure>
+          <img src="../images/web/outdoors/telluride-chute.jpg" alt="Two skiers at the bottom of a rocky snow chute" loading="lazy">
+          <figcaption><span>Chute skiing at Telluride</span><span class="elev">11,960 ft</span></figcaption>
+        </figure>
+        <figure>
+          <img src="../images/web/outdoors/rollins-pass-fog.jpg" alt="Two hikers on a trail through golden tundra grass in fog" loading="lazy">
+          <figcaption><span>October fog on Rollins Pass, Colorado</span><span class="elev">11,450 ft</span></figcaption>
+        </figure>
+        <figure>
+          <img src="../images/web/outdoors/sierra-camp-coffee.jpg" alt="A hooded hiker holding a mug beside an alpine lake ringed by pines" loading="lazy">
+          <figcaption><span>Camp coffee above a Sierra lake</span><span class="elev">9,390 ft</span></figcaption>
+        </figure>
+        <figure>
+          <img src="../images/web/outdoors/bryce-wall-street.jpg" alt="Hikers on switchbacks between orange hoodoo walls" loading="lazy">
+          <figcaption><span>Wall Street switchbacks, Bryce Canyon</span><span class="elev">7,840 ft</span></figcaption>
+        </figure>
+        <figure>
+          <img src="../images/web/outdoors/owens-river.jpg" alt="A meandering creek through green meadow below brown mountains" loading="lazy">
+          <figcaption><span>Trout water in Long Valley, Eastern Sierra</span><span class="elev">6,860 ft</span></figcaption>
+        </figure>
+        <figure>
+          <img src="../images/web/outdoors/sedona-cathedral-rock.jpg" alt="Cathedral Rock lit red-orange at golden hour" loading="lazy">
+          <figcaption><span>Cathedral Rock at golden hour, Sedona</span><span class="elev">4,080 ft</span></figcaption>
+        </figure>
+        <figure>
+          <img src="../images/web/outdoors/half-dome-alpenglow.jpg" alt="Half Dome glowing orange at sunset above dark pines" loading="lazy">
+          <figcaption><span>Last light on Half Dome, Yosemite Valley</span><span class="elev">4,000 ft</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <footer>
+      <div class="end">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2 20 9 7l4 6 3-4 6 11z"/><path d="M9 7l1.6 2.9L12 9" stroke-linecap="round"/></svg>
+        <div>
+          <p>Pack weight for this visit: <b id="pack">measuring</b>. No trackers, no frameworks, and photos load only when you reach them.</p>
+          <p><em>Leave no trace.</em></p>
+        </div>
+      </div>
+      <p class="copy">&copy; 2026 Ori Miller</p>
+    </footer>
+  </main>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <img alt="">
+    <figcaption></figcaption>
+  </div>
+
+  <script>
+    /* ---------- Hero: terrain, contours, and an A* route ---------- */
+    (() => {
+      const hero = document.querySelector('.hero');
+      const area = document.querySelector('.map-area');
+      const canvas = document.getElementById('map');
+      const ctx = canvas.getContext('2d');
+      const summitEl = document.querySelector('.summit');
+      const statsEl = document.getElementById('stats');
+      const resetBtn = document.getElementById('reset');
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const CELL = 5;
+      const textEl = document.querySelector('.hero-text');
+      let W, H, cols, rows, h, base, summit, R, start, goal, userGoal = null, anim, lastW = 0, avoid = null;
+      let lake = null, lakeMask, wetMask, rivers = [];
+
+      // Deterministic value noise, so the same mountain appears on every visit
+      const hash = (x, y) => {
+        let n = Math.imul(x, 374761393) ^ Math.imul(y, 668265263);
+        n = Math.imul(n ^ (n >>> 13), 1274126177);
+        return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
+      };
+      const ease = t => t * t * (3 - 2 * t);
+      const noise = (x, y) => {
+        const ix = Math.floor(x), iy = Math.floor(y), fx = ease(x - ix), fy = ease(y - iy);
+        const a = hash(ix, iy), b = hash(ix + 1, iy), c = hash(ix, iy + 1), d = hash(ix + 1, iy + 1);
+        return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
+      };
+      const fbm = (x, y) => {
+        let s = 0, amp = 0.5, f = 1;
+        for (let o = 0; o < 5; o++) { s += amp * noise(x * f + o * 17.3, y * f - o * 9.1); f *= 2.03; amp *= 0.5; }
+        return s;
+      };
+
+      function terrain() {
+        const r = area.getBoundingClientRect();
+        W = r.width; H = r.height;
+        const s = summitEl.getBoundingClientRect();
+        summit = { x: s.left - r.left + s.width / 2, y: s.top - r.top + s.height / 2 };
+        R = s.width / 2;
+        cols = Math.ceil(W / CELL) + 1; rows = Math.ceil(H / CELL) + 1;
+        h = new Float32Array(cols * rows);
+        const narrow = W < 760;
+        const peaks = [
+          { x: summit.x, y: summit.y, a: 1.0, s: R * 2.0 },
+          { x: summit.x - R * (narrow ? 1.9 : 2.7), y: summit.y + R * 1.35, a: 0.45, s: R * 1.35 },
+          { x: summit.x + R * (narrow ? 1.6 : 2.3), y: summit.y + R * 1.8, a: 0.32, s: R * 1.15 },
+          { x: summit.x + R * 1.2, y: summit.y - R * 2.4, a: 0.28, s: R * 1.3 }
+        ];
+        for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+          const x = i * CELL, y = j * CELL;
+          let v = 0.6 * (fbm(x / 330, y / 330) - 0.5) - 0.24 * (y / H);
+          for (const p of peaks) v += p.a * Math.exp(-((x - p.x) ** 2 + (y - p.y) ** 2) / (2 * p.s * p.s));
+          h[j * cols + i] = v;
+        }
+        start = narrow ? { x: W * 0.12, y: H - 24 } : { x: W * 0.56, y: H - 84 };
+        hydrology(narrow);
+        // Cells under the headline cost more, so routes stay clear of the text
+        const tr = textEl.getBoundingClientRect();
+        avoid = narrow ? null : { x1: (tr.left - r.left) / CELL, x2: (tr.right - r.left + 24) / CELL, y1: (tr.top - r.top) / CELL, y2: (tr.bottom - r.top) / CELL };
+        goal = summitGoal();
+      }
+
+      // Chaikin smoothing of grid cells into a flowing line
+      const chaikin = cells => {
+        let out = cells.map(([i, j]) => ({ x: i * CELL, y: j * CELL }));
+        for (let it = 0; it < 3; it++) {
+          const nx = [out[0]];
+          for (let k = 0; k < out.length - 1; k++) {
+            const p = out[k], q = out[k + 1];
+            nx.push({ x: 0.75 * p.x + 0.25 * q.x, y: 0.75 * p.y + 0.25 * q.y }, { x: 0.25 * p.x + 0.75 * q.x, y: 0.25 * p.y + 0.75 * q.y });
+          }
+          nx.push(out[out.length - 1]); out = nx;
+        }
+        return out;
+      };
+
+      // An alpine lake in a cirque on the summit's flank, filled to its spill point,
+      // and creeks that follow the terrain downhill to the edge of the map
+      function hydrology(narrow) {
+        const N = cols * rows;
+        lakeMask = new Uint8Array(N); wetMask = new Uint8Array(N); rivers = [];
+        const c = narrow ? { x: summit.x + R * 1.3, y: summit.y - R * 1.15 } : { x: summit.x + R * 1.65, y: summit.y - R * 1.1 };
+        const lr = R * (narrow ? 0.44 : 0.4);
+        const shape = a => 1 + 0.2 * Math.sin(3 * a + 0.7) + 0.1 * Math.sin(5 * a + 2.1) + 0.05 * Math.sin(8 * a + 1.3);
+        const rn = (x, y) => Math.hypot(x - c.x, y - c.y) / (lr * shape(Math.atan2(y - c.y, x - c.x)));
+        const sig = lr * 1.7;
+        for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+          const dx = i * CELL - c.x, dy = j * CELL - c.y;
+          h[j * cols + i] -= 0.16 * Math.exp(-(dx * dx + dy * dy) / (2 * sig * sig));
+        }
+        // The lake fills to the lowest notch on its downhill rim; that is where the outlet starts
+        let level = Infinity, outlet = -1;
+        for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+          const x = i * CELL, y = j * CELL, r = rn(x, y), k = j * cols + i;
+          if (r > 1.15 && r < 1.45 && (y - c.y) / Math.hypot(x - c.x, y - c.y) > 0.8 && h[k] < level) { level = h[k]; outlet = k; }
+        }
+        for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+          const r = rn(i * CELL, j * CELL), k = j * cols + i;
+          if (r <= 1) { h[k] = level - 0.002; lakeMask[k] = 1; }
+          else if (r < 1.6) h[k] = Math.max(h[k], level + 0.03 * (r - 1));
+        }
+        lake = { c, lr, shape };
+
+        // Steepest descent with a little momentum; joins another creek if it meets one
+        const owner = new Int16Array(N).fill(-1);
+        const descend = (i, j, drift) => {
+          const path = [[i, j]], seen = new Set([j * cols + i]);
+          let pi = 0, pj = 0, joins = -1;
+          for (let n = 0; n < 4000; n++) {
+            let best = null, bestV = Infinity;
+            for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+              if (!di && !dj) continue;
+              const ni = i + di, nj = j + dj, k = nj * cols + ni;
+              if (ni < 0 || nj < 0 || ni >= cols || nj >= rows || seen.has(k) || lakeMask[k]) continue;
+              const side = ni < 10 || ni > cols - 11 ? 0.004 : 0;
+              const v = (h[k] - h[j * cols + i]) / (di && dj ? Math.SQRT2 : 1) - 0.0006 * (di * pi + dj * pj) - (drift || 0) * dj + side;
+              if (v < bestV) { bestV = v; best = [ni, nj, di, dj]; }
+            }
+            if (!best) break;
+            [i, j, pi, pj] = best;
+            seen.add(j * cols + i); path.push([i, j]);
+            if (wetMask[j * cols + i]) { joins = owner[j * cols + i]; break; }
+            if (i <= 0 || j <= 0 || i >= cols - 1 || j >= rows - 1) break;
+          }
+          path.forEach(([a, b]) => { wetMask[b * cols + a] = 1; owner[b * cols + a] = rivers.length; });
+          return { pts: path, joins };
+        };
+        const at = (x, y) => [Math.max(1, Math.min(cols - 2, Math.round(x / CELL))), Math.max(1, Math.min(rows - 2, Math.round(y / CELL)))];
+
+        // The outlet finds the cheapest way down to the valley floor: downhill is free, climbing is
+        // expensive, and it may end by joining another creek
+        const drain = start => {
+          const g = new Float32Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1), done = new Uint8Array(N);
+          const heap = [];
+          const push = (f, i) => { heap.push([f, i]); let k = heap.length - 1; while (k > 0) { const q = (k - 1) >> 1; if (heap[q][0] <= heap[k][0]) break; [heap[q], heap[k]] = [heap[k], heap[q]]; k = q; } };
+          const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let k = 0; for (;;) { const l = 2 * k + 1, r = l + 1; let m = k; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === k) break; [heap[m], heap[k]] = [heap[k], heap[m]]; k = m; } } return top; };
+          const sr2 = ((R + 14) / CELL) ** 2, sci = summit.x / CELL, scj = summit.y / CELL;
+          g[start] = 0; push(rows, start);
+          let end = -1;
+          while (heap.length) {
+            const u = pop()[1];
+            if (done[u]) continue;
+            done[u] = 1;
+            const ui = u % cols, uj = (u - ui) / cols;
+            if (uj === rows - 1 || (wetMask[u] && u !== start)) { end = u; break; }
+            for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+              if (!di && !dj) continue;
+              const vi = ui + di, vj = uj + dj, v = vj * cols + vi;
+              if (vi < 1 || vj < 0 || vi > cols - 2 || vj >= rows || done[v] || lakeMask[v]) continue;
+              if ((vi - sci) ** 2 + (vj - scj) ** 2 < sr2) continue;
+              const d = di && dj ? Math.SQRT2 : 1;
+              const side = vi < 10 || vi > cols - 11 ? 3 : 0;
+              const ng = g[u] + d * (1 + 300 * Math.max(0, h[v] - h[u]) + side);
+              if (ng < g[v]) { g[v] = ng; prev[v] = u; push(ng + (rows - 1 - vj), v); }
+            }
+          }
+          const path = [];
+          for (let u = end; u !== -1; u = prev[u]) path.push([u % cols, Math.floor(u / cols)]);
+          path.reverse();
+          const joins = end >= 0 && wetMask[end] ? owner[end] : -1;
+          path.forEach(([a, b]) => { wetMask[b * cols + a] = 1; owner[b * cols + a] = rivers.length; });
+          return { pts: path.length ? path : [[start % cols, Math.floor(start / cols)]], joins };
+        };
+
+        rivers.push({ name: 'Trout Creek', ...descend(...at(summit.x - R * 1.15, summit.y + R * 1.05), 0.0006) });
+        const out = drain(outlet);
+        const oa = Math.atan2(Math.floor(outlet / cols) * CELL - c.y, (outlet % cols) * CELL - c.x), orr = lr * shape(oa) * 0.97;
+        out.pts.unshift([(c.x + Math.cos(oa) * orr) / CELL, (c.y + Math.sin(oa) * orr) / CELL]);
+        rivers.push({ name: 'outlet', ...out });
+
+        // Meander: a sideways wobble that grows as the water leaves the steep ground
+        rivers.forEach((rv, r) => {
+          const pts = chaikin(rv.pts), n = pts.length, s = [0];
+          for (let k = 1; k < n; k++) s.push(s[k - 1] + Math.hypot(pts[k].x - pts[k - 1].x, pts[k].y - pts[k - 1].y));
+          const total = s[n - 1] || 1, phase = 1.7 * r + 0.4;
+          rv.line = pts.map((p, k) => {
+            const a = pts[Math.max(0, k - 3)], b = pts[Math.min(n - 1, k + 3)];
+            const tx = b.x - a.x, ty = b.y - a.y, tl = Math.hypot(tx, ty) || 1;
+            const u = s[k] / total;
+            const env = ease(Math.min(1, u / 0.25)) * (rv.joins >= 0 ? ease(Math.min(1, (1 - u) / 0.15)) : 1);
+            const off = (4 + 10 * u) * env * (0.65 * Math.sin(s[k] / 34 + phase) + 0.35 * Math.sin(s[k] / 13 + phase * 2.3));
+            return { x: p.x - ty / tl * off, y: p.y + tx / tl * off };
+          });
+        });
+        // Tributaries end exactly on the creek they join
+        rivers.forEach(rv => {
+          if (rv.joins < 0 || !rivers[rv.joins]) return;
+          const end = rv.line[rv.line.length - 1];
+          let best = null, bd = Infinity;
+          for (const q of rivers[rv.joins].line) { const d = (q.x - end.x) ** 2 + (q.y - end.y) ** 2; if (d < bd) { bd = d; best = q; } }
+          if (best) rv.line[rv.line.length - 1] = { x: best.x, y: best.y };
+        });
+
+        // Cut each channel into the slope, deeper downstream, so contours bend into V's that point upstream
+        wetMask = new Uint8Array(N);
+        const carve = new Float32Array(N), w = 1.6;
+        for (const rv of rivers) {
+          rv.line.forEach((p, n) => {
+            const depth = 0.012 + 0.03 * (n / rv.line.length);
+            const ci = p.x / CELL, cj = p.y / CELL, i0 = Math.round(ci), j0 = Math.round(cj);
+            if (i0 >= 0 && j0 >= 0 && i0 < cols && j0 < rows) wetMask[j0 * cols + i0] = 1;
+            for (let j = j0 - 5; j <= j0 + 5; j++) for (let i = i0 - 5; i <= i0 + 5; i++) {
+              if (i < 0 || j < 0 || i >= cols || j >= rows) continue;
+              const k = j * cols + i, d2 = (i - ci) ** 2 + (j - cj) ** 2;
+              const v = depth * Math.exp(-d2 / (2 * w * w));
+              if (v > carve[k]) carve[k] = v;
+            }
+          });
+        }
+        for (let k = 0; k < N; k++) if (!lakeMask[k]) h[k] -= carve[k];
+        // Widen the wet cells by one so a diagonal step can't slip across a creek for free
+        const grown = wetMask.slice();
+        for (let j = 1; j < rows - 1; j++) for (let i = 1; i < cols - 1; i++) {
+          const k = j * cols + i;
+          if (wetMask[k]) { grown[k - 1] = grown[k + 1] = grown[k - cols] = grown[k + cols] = 1; }
+        }
+        wetMask = grown;
+      }
+
+      function summitGoal() {
+        const dx = start.x - summit.x, dy = start.y - summit.y, d = Math.hypot(dx, dy);
+        return { x: summit.x + dx / d * (R + 16), y: summit.y + dy / d * (R + 16) };
+      }
+
+      function drawBase() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        base = document.createElement('canvas');
+        base.width = Math.round(W * dpr); base.height = Math.round(H * dpr);
+        const b = base.getContext('2d');
+        b.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Faint survey grid
+        b.strokeStyle = 'rgba(237, 230, 214, 0.035)'; b.lineWidth = 1;
+        b.beginPath();
+        for (let x = 0; x < W; x += 120) { b.moveTo(x + 0.5, 0); b.lineTo(x + 0.5, H); }
+        for (let y = 0; y < H; y += 120) { b.moveTo(0, y + 0.5); b.lineTo(W, y + 0.5); }
+        b.stroke();
+
+        // Contours by marching squares; every fifth one is an index contour
+        let min = Infinity, max = -Infinity;
+        for (const v of h) { if (v < min) min = v; if (v > max) max = v; }
+        const n = 32, step = (max - min) / n;
+        for (let k = 1; k < n; k++) {
+          const L = min + k * step;
+          b.beginPath();
+          for (let j = 0; j < rows - 1; j++) for (let i = 0; i < cols - 1; i++) {
+            const a = h[j * cols + i], bb = h[j * cols + i + 1], c = h[(j + 1) * cols + i + 1], d = h[(j + 1) * cols + i];
+            const code = (a > L ? 8 : 0) | (bb > L ? 4 : 0) | (c > L ? 2 : 0) | (d > L ? 1 : 0);
+            if (code === 0 || code === 15) continue;
+            const x = i * CELL, y = j * CELL;
+            const T = () => [x + CELL * (L - a) / (bb - a), y];
+            const Rt = () => [x + CELL, y + CELL * (L - bb) / (c - bb)];
+            const B = () => [x + CELL * (L - d) / (c - d), y + CELL];
+            const Lf = () => [x, y + CELL * (L - a) / (d - a)];
+            const seg = (p, q) => { b.moveTo(p[0], p[1]); b.lineTo(q[0], q[1]); };
+            switch (code) {
+              case 1: case 14: seg(Lf(), B()); break;
+              case 2: case 13: seg(B(), Rt()); break;
+              case 3: case 12: seg(Lf(), Rt()); break;
+              case 4: case 11: seg(T(), Rt()); break;
+              case 5: seg(Lf(), T()); seg(B(), Rt()); break;
+              case 6: case 9: seg(T(), B()); break;
+              case 7: case 8: seg(Lf(), T()); break;
+              case 10: seg(Lf(), B()); seg(T(), Rt()); break;
+            }
+          }
+          const index = k % 5 === 0;
+          b.strokeStyle = index ? 'rgba(170, 120, 72, 0.6)' : 'rgba(128, 90, 56, 0.36)';
+          b.lineWidth = index ? 1.3 : 0.8;
+          b.stroke();
+        }
+
+        // Aspen groves: gold stipple in mid-elevation patches
+        b.fillStyle = 'rgba(242, 180, 65, 0.55)';
+        b.beginPath();
+        const lo = min + (max - min) * 0.22, hi = min + (max - min) * 0.55;
+        for (let j = 1; j < rows - 1; j++) for (let i = 1; i < cols - 1; i++) {
+          const x = i * CELL, y = j * CELL;
+          const v = h[j * cols + i];
+          if (v < lo || v > hi) continue;
+          if (Math.hypot(x - summit.x, y - summit.y) < R + 24) continue;
+          if (wetMask[j * cols + i] || lakeMask[j * cols + i]) continue;
+          const grove = fbm(x / 110 + 40, y / 110 - 12);
+          if (grove < 0.58 || hash(i * 7 + 3, j * 13 + 1) > (grove - 0.58) * 3.2) continue;
+          const px = x + (hash(i, j) - 0.5) * CELL, py = y + (hash(j, i) - 0.5) * CELL;
+          b.moveTo(px + 1.1, py); b.arc(px, py, 1.1, 0, Math.PI * 2);
+        }
+        b.fill();
+
+        // Creeks, widening downstream
+        b.lineCap = 'round'; b.strokeStyle = 'rgba(141, 189, 214, 0.85)';
+        for (const rv of rivers) {
+          const L = rv.line;
+          for (let k = 1; k < L.length; k++) {
+            b.lineWidth = 0.9 + 1.9 * (k / L.length);
+            b.beginPath(); b.moveTo(L[k - 1].x, L[k - 1].y); b.lineTo(L[k].x, L[k].y); b.stroke();
+          }
+        }
+
+        // The lake: an opaque bed hides any contour under the water, then water, a depth line, and the shore
+        const { c, lr, shape } = lake;
+        const ring = scale => {
+          const path = new Path2D();
+          for (let a = 0; a <= Math.PI * 2 + 0.01; a += 0.04) {
+            const r = lr * shape(a) * scale, x = c.x + Math.cos(a) * r, y = c.y + Math.sin(a) * r;
+            a ? path.lineTo(x, y) : path.moveTo(x, y);
+          }
+          path.closePath();
+          return path;
+        };
+        const shore = ring(1);
+        b.fillStyle = '#111915'; b.fill(shore);
+        b.fillStyle = 'rgba(141, 189, 214, 0.2)'; b.fill(shore);
+        b.setLineDash([3, 4]); b.lineWidth = 0.8; b.strokeStyle = 'rgba(141, 189, 214, 0.4)'; b.stroke(ring(0.58)); b.setLineDash([]);
+        b.lineWidth = 1.5; b.strokeStyle = 'rgba(141, 189, 214, 0.9)'; b.stroke(shore);
+
+        // Names, in the italic blue that maps use for water
+        const clear = (x, y, wdt) => x - wdt / 2 > 6 && x + wdt / 2 < W - 6 && y > 16 && y < H - 8 &&
+          [x - wdt / 2, x, x + wdt / 2].every(px => Math.hypot(px - summit.x, y - 5 - summit.y) > R + 20) &&
+          !(avoid && x / CELL > avoid.x1 && x / CELL < avoid.x2 && y / CELL > avoid.y1 && y / CELL < avoid.y2);
+        const water = (text, x, y, angle) => {
+          b.save(); b.translate(x, y); b.rotate(angle || 0);
+          b.font = 'italic 13px "Source Serif 4", Georgia, serif'; b.textAlign = 'center';
+          b.lineWidth = 4; b.strokeStyle = 'rgba(17, 25, 21, 0.92)'; b.strokeText(text, 0, 0);
+          b.fillStyle = '#8dbdd6'; b.fillText(text, 0, 0);
+          b.restore();
+        };
+        b.font = 'italic 13px "Source Serif 4", Georgia, serif';
+        const lw = b.measureText('Lost Lake').width;
+        const spots = [[c.x, c.y + lr * 1.3 + 14], [c.x, c.y - lr * 1.3 - 6], [c.x + lr * 1.3 + lw / 2 + 4, c.y + 4], [c.x - lr * 1.3 - lw / 2 - 4, c.y + 4]];
+        const spot = spots.find(([x, y]) => clear(x, y, lw)) || spots[0];
+        water('Lost Lake', spot[0], spot[1]);
+        const creek = rivers.find(rv => rv.name === 'Trout Creek');
+        if (creek && creek.line.length > 40 && W >= 760) {
+          const L = creek.line, cw = b.measureText('Trout Creek').width;
+          for (const f of [0.45, 0.6, 0.3, 0.75]) {
+            const k = Math.floor(L.length * f), a0 = L[Math.max(0, k - 8)], a1 = L[Math.min(L.length - 1, k + 8)];
+            let ang = Math.atan2(a1.y - a0.y, a1.x - a0.x);
+            if (ang > Math.PI / 2) ang -= Math.PI; else if (ang < -Math.PI / 2) ang += Math.PI;
+            const x = L[k].x + Math.sin(ang) * 9, y = L[k].y - Math.cos(ang) * 9;
+            if (clear(x, y, cw)) { water('Trout Creek', x, y, ang); break; }
+          }
+        }
+      }
+
+      // A* over an 8-connected grid; moves cost more as the grade steepens
+      function plan(from, to) {
+        const t0 = performance.now();
+        const N = cols * rows;
+        const g = new Float32Array(N).fill(Infinity);
+        const prev = new Int32Array(N).fill(-1);
+        const closed = new Uint8Array(N);
+        const blocked = new Uint8Array(N);
+        const rr = (R + 6) / CELL, sc = summit.x / CELL, sr = summit.y / CELL;
+        for (let j = Math.max(0, Math.floor(sr - rr)); j <= Math.min(rows - 1, Math.ceil(sr + rr)); j++)
+          for (let i = Math.max(0, Math.floor(sc - rr)); i <= Math.min(cols - 1, Math.ceil(sc + rr)); i++)
+            if ((i - sc) ** 2 + (j - sr) ** 2 < rr * rr) blocked[j * cols + i] = 1;
+        const cl = (v, m) => Math.max(0, Math.min(m - 1, Math.round(v)));
+        const si = cl(from.x / CELL, cols), sj = cl(from.y / CELL, rows);
+        const gi = cl(to.x / CELL, cols), gj = cl(to.y / CELL, rows);
+        for (let k = 0; k < N; k++) if (lakeMask[k]) blocked[k] = 1;
+        let t = gj * cols + gi;
+        if (lakeMask[t]) { // nearest dry cell to a goal set on the water
+          let best = Infinity;
+          for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+            const k = j * cols + i, d = (i - gi) ** 2 + (j - gj) ** 2;
+            if (!lakeMask[k] && !blocked[k] && d < best) { best = d; t = k; }
+          }
+        }
+        const s = sj * cols + si;
+        blocked[t] = 0;
+        const hScale = 2.0 * (R * 2.0) / CELL, gMax = 0.8;
+        const ti = t % cols, tj = Math.floor(t / cols);
+        const heur = (i, j) => { const dx = Math.abs(i - ti), dy = Math.abs(j - tj); return dx + dy + (Math.SQRT2 - 2) * Math.min(dx, dy); };
+        const heap = [];
+        const push = (f, i) => {
+          heap.push([f, i]); let k = heap.length - 1;
+          while (k > 0) { const p = (k - 1) >> 1; if (heap[p][0] <= heap[k][0]) break; [heap[p], heap[k]] = [heap[k], heap[p]]; k = p; }
+        };
+        const pop = () => {
+          const top = heap[0], last = heap.pop();
+          if (heap.length) {
+            heap[0] = last; let k = 0;
+            for (;;) {
+              const l = 2 * k + 1, r = l + 1; let m = k;
+              if (l < heap.length && heap[l][0] < heap[m][0]) m = l;
+              if (r < heap.length && heap[r][0] < heap[m][0]) m = r;
+              if (m === k) break;
+              [heap[m], heap[k]] = [heap[k], heap[m]]; k = m;
+            }
+          }
+          return top;
+        };
+        g[s] = 0; push(heur(si, sj), s);
+        const order = [];
+        while (heap.length) {
+          const u = pop()[1];
+          if (closed[u]) continue;
+          closed[u] = 1; order.push(u);
+          if (u === t) break;
+          const ui = u % cols, uj = (u - ui) / cols;
+          for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+            if (!di && !dj) continue;
+            const vi = ui + di, vj = uj + dj;
+            if (vi < 0 || vj < 0 || vi >= cols || vj >= rows) continue;
+            const v = vj * cols + vi;
+            if (closed[v] || blocked[v]) continue;
+            const d = di && dj ? Math.SQRT2 : 1;
+            const grade = Math.abs(h[v] - h[u]) * hScale / d;
+            const edge = Math.min(vi, vj, cols - 1 - vi, rows - 1 - vj) < 7 ? 3 : 1;
+            const away = (avoid && vi > avoid.x1 && vi < avoid.x2 && vj > avoid.y1 && vj < avoid.y2 ? 6 : 1) * edge;
+            const ford = wetMask[v] ? 14 : 0;
+            const ng = g[u] + d * away * (1 + 2.5 * grade + 6 * (grade / gMax) ** 4) + ford;
+            if (ng < g[v]) { g[v] = ng; prev[v] = u; push(ng + heur(vi, vj), v); }
+          }
+        }
+        const pts = [];
+        for (let u = t; u !== -1; u = prev[u]) pts.push({ x: (u % cols) * CELL, y: Math.floor(u / cols) * CELL });
+        pts.reverse();
+        // Chaikin smoothing so the line reads as a trail, not a staircase
+        let path = pts;
+        for (let it = 0; it < 3; it++) {
+          const out = [path[0]];
+          for (let k = 0; k < path.length - 1; k++) {
+            const p = path[k], q = path[k + 1];
+            out.push({ x: 0.75 * p.x + 0.25 * q.x, y: 0.75 * p.y + 0.25 * q.y }, { x: 0.25 * p.x + 0.75 * q.x, y: 0.25 * p.y + 0.75 * q.y });
+          }
+          out.push(path[path.length - 1]);
+          path = out;
+        }
+        return { path, order, ms: performance.now() - t0, found: prev[t] !== -1 || s === t };
+      }
+
+      function label(text, x, y, align) {
+        ctx.font = 'italic 14px "Source Serif 4", Georgia, serif';
+        ctx.textAlign = align || 'left';
+        ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(17, 25, 21, 0.9)';
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = '#ede6d6';
+        ctx.fillText(text, x, y);
+      }
+
+      function frame(result, t) {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(base, 0, 0);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Cells A* expanded, shown briefly while the route draws
+        if (!reduce && t < 1) {
+          const shown = Math.floor(result.order.length * Math.min(1, t / 0.35));
+          ctx.fillStyle = `rgba(242, 180, 65, ${0.16 * (1 - Math.max(0, (t - 0.35) / 0.65))})`;
+          for (let k = 0; k < shown; k++) {
+            const u = result.order[k];
+            ctx.fillRect((u % cols) * CELL - 0.8, Math.floor(u / cols) * CELL - 0.8, 1.6, 1.6);
+          }
+        }
+
+        // Route, drawn progressively, with robot poses along it
+        const p = result.path;
+        const lens = [0];
+        for (let k = 1; k < p.length; k++) lens.push(lens[k - 1] + Math.hypot(p[k].x - p[k - 1].x, p[k].y - p[k - 1].y));
+        const total = lens[lens.length - 1], upto = total * (reduce ? 1 : Math.min(1, Math.max(0, (t - 0.2) / 0.8)));
+        ctx.save();
+        ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#f2b441'; ctx.setLineDash([7, 6]);
+        ctx.shadowColor = 'rgba(242, 180, 65, 0.4)'; ctx.shadowBlur = 6;
+        ctx.beginPath(); ctx.moveTo(p[0].x, p[0].y);
+        for (let k = 1; k < p.length && lens[k] <= upto; k++) ctx.lineTo(p[k].x, p[k].y);
+        ctx.stroke();
+        ctx.restore();
+        ctx.strokeStyle = 'rgba(242, 180, 65, 0.85)'; ctx.lineWidth = 1.4; ctx.lineJoin = 'round';
+        for (let d = 40, k = 1; d < upto - 16; d += 72) {
+          while (k < p.length - 1 && lens[k] < d) k++;
+          const a = Math.atan2(p[k].y - p[k - 1].y, p[k].x - p[k - 1].x);
+          ctx.save(); ctx.translate(p[k].x, p[k].y); ctx.rotate(a);
+          ctx.beginPath(); ctx.moveTo(-3.5, -3.5); ctx.lineTo(3, 0); ctx.lineTo(-3.5, 3.5); ctx.stroke();
+          ctx.restore();
+        }
+
+        // Trailhead and goal markers
+        ctx.fillStyle = '#111915'; ctx.strokeStyle = '#f2b441'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(start.x, start.y, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        if (start.x < 100) label('Trailhead', start.x + 12, start.y + 5); else label('Trailhead', start.x - 12, start.y + 5, 'right');
+        if (userGoal) {
+          const g = p[p.length - 1];
+          ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.x, g.y - 22); ctx.stroke();
+          ctx.fillStyle = '#f2b441';
+          ctx.beginPath(); ctx.moveTo(g.x, g.y - 22); ctx.lineTo(g.x + 13, g.y - 17); ctx.lineTo(g.x, g.y - 12); ctx.closePath(); ctx.fill();
+          if (g.x > W - 120) label('Your goal', g.x - 8, g.y - 26, 'right'); else label('Your goal', g.x + 16, g.y - 4);
+        }
+      }
+
+      function run(animate) {
+        cancelAnimationFrame(anim);
+        const target = userGoal || goal;
+        const result = plan(start, target);
+        statsEl.textContent = ` Last plan: ${result.order.length.toLocaleString()} cells expanded in ${Math.max(1, Math.round(result.ms))} ms.`;
+        if (!animate || reduce) { frame(result, 1); return; }
+        const t0 = performance.now(), dur = 1700;
+        const step = now => {
+          const t = Math.min(1, (now - t0) / dur);
+          frame(result, t);
+          if (t < 1) anim = requestAnimationFrame(step);
+        };
+        anim = requestAnimationFrame(step);
+      }
+
+      function build(animate) {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        terrain();
+        canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+        drawBase();
+        if (userGoal) userGoal = { x: Math.min(userGoal.x, W - 10), y: Math.min(userGoal.y, H - 10) };
+        run(animate);
+        lastW = W;
+      }
+
+      canvas.addEventListener('click', e => {
+        const r = canvas.getBoundingClientRect();
+        const x = e.clientX - r.left, y = e.clientY - r.top;
+        userGoal = Math.hypot(x - summit.x, y - summit.y) < R + 16 ? null : { x, y };
+        resetBtn.hidden = !userGoal;
+        run(true);
+      });
+      resetBtn.addEventListener('click', () => { userGoal = null; resetBtn.hidden = true; run(true); });
+
+      let timer;
+      window.addEventListener('resize', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { if (Math.abs(area.getBoundingClientRect().width - lastW) > 2) build(false); }, 160);
+      });
+
+      const go = () => build(true);
+      (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => {
+        if (summitEl.querySelector('img').complete) go(); else summitEl.querySelector('img').addEventListener('load', go, { once: true });
+      });
+    })();
+
+    /* ---------- Trail line, minibar, pack weight, lightbox ---------- */
+    (() => {
+      const hero = document.querySelector('.hero');
+      const trail = document.getElementById('trail');
+      const done = document.getElementById('trail-done');
+      const wps = [...document.querySelectorAll('.wp')];
+      const minibar = document.getElementById('minibar');
+      const pack = document.getElementById('pack');
+
+      function onScroll() {
+        const r = trail.getBoundingClientRect();
+        const y = Math.min(Math.max(window.innerHeight * 0.55 - r.top, 0), r.height);
+        done.style.height = y + 'px';
+        for (const w of wps) {
+          const wy = w.getBoundingClientRect().top + w.offsetHeight / 2 - r.top;
+          w.classList.toggle('passed', wy <= y);
+        }
+        minibar.classList.toggle('show', window.scrollY > hero.offsetHeight * 0.8);
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      onScroll();
+
+      function weigh() {
+        let bytes = 0;
+        const nav = performance.getEntriesByType('navigation')[0];
+        if (nav) bytes += nav.encodedBodySize || nav.transferSize || 0;
+        for (const e of performance.getEntriesByType('resource')) bytes += e.encodedBodySize || e.transferSize || 0;
+        pack.textContent = bytes > 1e6 ? (bytes / 1e6).toFixed(2) + ' MB' : Math.round(bytes / 1e3) + ' KB';
+      }
+      if ('PerformanceObserver' in window) {
+        try { new PerformanceObserver(weigh).observe({ type: 'resource', buffered: true }); } catch (e) { /* older browsers */ }
+      }
+      window.addEventListener('load', weigh);
+      weigh();
+
+      const lightbox = document.getElementById('lightbox');
+      const lbImg = lightbox.querySelector('img');
+      const lbCap = lightbox.querySelector('figcaption');
+      document.querySelectorAll('button[data-photo]').forEach(btn => btn.addEventListener('click', () => {
+        lbImg.src = btn.dataset.photo; lbImg.alt = btn.dataset.caption; lbCap.textContent = btn.dataset.caption;
+        lightbox.classList.add('open');
+      }));
+      lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.classList.remove('open'); });
+    })();
+
+    /* ---------- Photo mosaic: parallax, quieter while reading, click a tile to open it ---------- */
+    (() => {
+      // Outdoor photos only: [file, in outdoors/?, shape (w = landscape, p = portrait, pano), caption]
+      const PHOTOS = [
+        ['balloon-fiesta', 1, 'w', 'Balloon Fiesta week over downtown Albuquerque.'],
+        ['boulder-mountain', 1, 'w', 'The view from Boulder Mountain, Utah.'],
+        ['bryce-wall-street', 1, 'w', 'Wall Street switchbacks, Bryce Canyon.'],
+        ['canyonlands', 1, 'w', 'Canyonlands, Utah.'],
+        ['capitol-reef-sulphur-creek', 1, 'w', 'Sulphur Creek, Capitol Reef.'],
+        ['cascades-night-sky', 1, 'w', 'A shooting star over the Cascades.'],
+        ['cloud-capped-range', 1, 'w', 'Cloud-capped peaks in southern New Mexico.'],
+        ['comet-falls', 1, 'p', 'Comet Falls, Mount Rainier.'],
+        ['delicate-arch', 1, 'p', 'Delicate Arch, Arches National Park.'],
+        ['eastern-sierra-pasture', 1, 'w', 'Cattle grazing below the Eastern Sierra.'],
+        ['elbert-above-clouds', 1, 'w', 'Above the clouds on the way up Mount Elbert.'],
+        ['elbert-summit', 1, 'w', 'On top of Mount Elbert, Colorado’s highest peak.'],
+        ['golden-gate-fog', 1, 'w', 'Fog swallowing the Golden Gate Bridge.'],
+        ['golden-gate-rocks', 1, 'w', 'The Golden Gate through the fog, San Francisco.'],
+        ['grand-canyon-rainbow', 1, 'p', 'A rainbow over the Grand Canyon from Grandview Point.'],
+        ['half-dome-alpenglow', 1, 'w', 'Last light on Half Dome, Yosemite Valley.'],
+        ['hobby-biking', 0, 'w', 'Fall gravel miles through the aspens.'],
+        ['hobby-climbing', 0, 'p', 'On belay under New Mexico skies.'],
+        ['hobby-flyfishing', 0, 'w', 'Casting on the Merced River below El Capitan, Yosemite.'],
+        ['hobby-photography', 0, 'w', 'Through the lens: a hummingbird posing at a feeder.'],
+        ['hobby-running', 0, 'p', 'Sunset trail run in the foothills.'],
+        ['hobby-skiing', 0, 'w', 'Scoping lines on a backcountry day in the Rockies.'],
+        ['idaho-sage-hike', 1, 'p', 'A sagebrush climb above Sun Valley, Idaho.'],
+        ['manzano-storm-light', 1, 'pano', 'Storm light over the mountains south of Albuquerque.'],
+        ['moab-red-road', 1, 'p', 'Red dirt road outside Moab.'],
+        ['olmsted-half-dome', 1, 'w', 'Half Dome from Olmsted Point, Yosemite.'],
+        ['owens-river', 1, 'w', 'Trout water in Long Valley, Eastern Sierra.'],
+        ['pacific-fog-coast', 1, 'w', 'Fog on the Pacific coast.'],
+        ['point-bonita', 1, 'p', 'The footbridge to Point Bonita Lighthouse.'],
+        ['rio-grande-gorge', 1, 'p', 'The Rio Grande Gorge near Taos.'],
+        ['rollins-pass-fog', 1, 'w', 'October fog on Rollins Pass, Colorado.'],
+        ['san-luis-cottonwoods', 1, 'w', 'Cottonwoods along a San Luis Valley highway.'],
+        ['sedona-cathedral-rock', 1, 'w', 'Cathedral Rock at golden hour, Sedona.'],
+        ['sierra-camp-coffee', 1, 'w', 'Camp coffee above a Sierra lake.'],
+        ['sierra-dusk', 1, 'p', 'Dusk over the Eastern Sierra.'],
+        ['sierra-meadow-creek', 1, 'w', 'A meadow creek in the Eastern Sierra.'],
+        ['ski-lift-snow', 1, 'p', 'Snow-loaded firs from the chairlift.'],
+        ['sun-valley-hills', 1, 'p', 'Summer clouds over the hills near Sun Valley, Idaho.'],
+        ['tanzania-bush-plane', 1, 'p', 'Over northern Tanzania by small plane.'],
+        ['taos-peaks', 1, 'w', 'Taos Ski Valley, New Mexico.'],
+        ['taos-ridge', 1, 'p', 'Weather on the ridge at Taos Ski Valley.'],
+        ['telluride-chute', 1, 'w', 'Chute skiing at Telluride.'],
+        ['utah-pink-cliffs', 1, 'w', 'Pink cliffs at dusk, southern Utah.'],
+        ['west-texas-windmill', 1, 'p', 'A water-pumping windmill in the West Texas desert.'],
+        ['yosemite-meadow', 1, 'w', 'A Yosemite Valley meadow below the granite walls.'],
+        ['zion-canyon', 1, 'p', 'Zion Canyon from the trail.']
+      ];
+      const mosaic = document.getElementById('mosaic');
+      const panels = [...document.querySelectorAll('.trail > section, .trail > footer')];
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const RATE = reduce ? 0 : 0.22;
+      let lastW = 0, builtFor = 0;
+
+      // Same shuffle on every visit, so the wall feels composed rather than random
+      let seed = 1004;
+      const rand = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+      const order = PHOTOS.slice();
+      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+
+      const io = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { const img = e.target; img.src = img.dataset.src; io.unobserve(img); } });
+      }, { rootMargin: '40% 0px' }) : null;
+
+      function build() {
+        const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+        const cols = Math.max(3, Math.min(9, Math.round(vw / 185)));
+        const colW = (vw - 10 - (cols - 1) * 5) / cols;
+        const rowH = Math.round(colW * 0.72);
+        const docH = document.documentElement.scrollHeight;
+        const rows = Math.ceil((vh + RATE * Math.max(0, docH - vh)) / (rowH + 5)) + 2;
+        mosaic.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        mosaic.style.gridAutoRows = rowH + 'px';
+        mosaic.textContent = '';
+        let cells = cols * rows, k = 0;
+        while (cells > 0) {
+          const [file, outdoors, shape, caption] = order[k % order.length];
+          let cs = 1, rs = 1;
+          if (shape === 'p') rs = 2;
+          else if (shape === 'pano') cs = 2;
+          else if (k % 9 === 4 && cols >= 4) { cs = 2; rs = 2; }
+          else if (k % 4 === 1) cs = 2;
+          k++;
+          cells -= cs * rs;
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.style.gridColumn = `span ${cs}`; tile.style.gridRow = `span ${rs}`;
+          tile.dataset.photo = `../images/web/${outdoors ? 'outdoors/' : ''}${file}.jpg`;
+          tile.dataset.caption = caption;
+          const img = document.createElement('img');
+          img.alt = ''; img.decoding = 'async';
+          img.dataset.src = `../images/web/mosaic/${file}.jpg`;
+          tile.appendChild(img);
+          mosaic.appendChild(tile);
+          if (io) io.observe(img); else img.src = img.dataset.src;
+        }
+        lastW = vw; builtFor = docH;
+        place();
+      }
+
+      function place() {
+        mosaic.style.transform = RATE ? `translate3d(0, ${-window.scrollY * RATE}px, 0)` : '';
+        // If the page grew after the wall was laid out, extend it rather than show bare ground
+        if (mosaic.getBoundingClientRect().bottom < window.innerHeight - 4 && document.documentElement.scrollHeight > builtFor + 40) { build(); return; }
+        const mid = window.innerHeight / 2;
+        const reading = panels.some(p => { const r = p.getBoundingClientRect(); return r.top < mid && r.bottom > mid; });
+        mosaic.classList.toggle('reading', reading);
+      }
+
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) { ticking = true; requestAnimationFrame(() => { place(); ticking = false; }); }
+      }, { passive: true });
+      let timer;
+      window.addEventListener('resize', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { if (Math.abs(document.documentElement.clientWidth - lastW) > 2) build(); else place(); }, 180);
+      });
+      // Page height settles once fonts and photos arrive; grow the wall if the page did
+      window.addEventListener('load', () => { if (document.documentElement.scrollHeight > builtFor + 200) build(); });
+
+      // Pointing at a tile shows it in full color; clicking opens it
+      const lightbox = document.getElementById('lightbox');
+      const lbImg = lightbox.querySelector('img');
+      const lbCap = lightbox.querySelector('figcaption');
+      mosaic.addEventListener('mouseover', e => { const t = e.target.closest('.tile'); if (t) t.classList.add('lit'); });
+      mosaic.addEventListener('mouseout', e => { const t = e.target.closest('.tile'); if (t) t.classList.remove('lit'); });
+      mosaic.addEventListener('click', e => {
+        const t = e.target.closest('.tile');
+        if (!t) return;
+        lbImg.src = t.dataset.photo; lbImg.alt = t.dataset.caption; lbCap.textContent = t.dataset.caption;
+        lightbox.classList.add('open');
+      });
+
+      build();
+    })();
+  </script>
+</body>
+</html>
